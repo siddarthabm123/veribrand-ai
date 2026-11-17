@@ -1,0 +1,52 @@
+.welcome-quick-launch { margin: 14px auto 0; padding: 14px 16px; max-width: 1120px; border: 1px solid #dcdcff; border-radius: 12px; background: linear-gradient(110deg,#f0efff,#fff 65%,#f7f7ff); box-shadow: 0 8px 24px #35319a10; }
+.welcome-quick-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.welcome-quick-head>div { display: grid; gap: 3px; }
+.welcome-quick-head>div>span,.welcome-guide-kicker,.audience-heading { color: #6259dc; font-size: 11px; font-weight: 800; letter-spacing: .9px; }
+.welcome-quick-head>div>b { color: #202a41; font-size: 16px; }
+.welcome-skip-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 0 15px; border: 0; border-radius: 7px; background: #4f46e5; color: white; font-size: 13px; font-weight: 700; cursor: pointer; }
+.welcome-skip-button:hover { background: #4038d0; }
+.welcome-quick-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 11px; }
+.welcome-quick-links a { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 10px; border: 1px solid #e4e5f2; border-radius: 999px; background: #fff; color: #46536a; font-size: 12px; font-weight: 600; transition: border-color .15s, color .15s, transform .15s; }
+.welcome-quick-links a:hover { border-color: #aaa5f2; color: #4f46e5; transform: translateY(-1px); }
+.welcome-guide-hero { padding-top: 40px; padding-bottom: 34px; }
+.welcome-guide-kicker { display: block; margin-top: 21px; }
+.welcome-guide-hero h1 { margin-top: 9px; font-size: clamp(36px,4.5vw,52px); line-height: 1.08; letter-spacing: -1.8px; }
+.welcome-analogy { display: grid; grid-template-columns: 38px 1fr; gap: 12px; max-width: 850px; margin: 21px auto 0; padding: 18px 20px; border: 1px solid #e5e6f0; border-radius: 11px; background: #fff; text-align: left; box-shadow: 0 7px 22px #26324a0b; }
+.analogy-icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: #eeedff; color: #554bd7; }
+.welcome-analogy b { display: block; margin-bottom: 6px; color: #25334a; font-size: 16px; }
+.welcome-analogy p { margin: 0; color: #647187; font-size: 14px; line-height: 1.7; }
+.welcome-checks { padding: 20px 0 24px; border-top: 1px solid #e7eaf0; }
+.welcome-checks .strip-heading h2,.welcome-how .strip-heading h2 { margin-bottom: 15px; font-size: 22px; }
+.welcome-check-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.welcome-check-grid article { display: grid; grid-template-columns: 34px 1fr; gap: 11px; padding: 15px; border: 1px solid #e8eaf0; border-radius: 9px; background: #fff; }
+.welcome-check-grid article>span { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; background: #f0efff; color: #554bd7; }
+.welcome-check-grid h3 { margin: 1px 0 5px; color: #26344b; font-size: 15px; }
+.welcome-check-grid p { margin: 0; color: #6c788c; font-size: 13px; line-height: 1.6; }
+.welcome-audience { display: grid; grid-template-columns: minmax(190px,.75fr) 2fr; align-items: center; gap: 18px; padding: 17px 0 20px; border-top: 1px solid #e7eaf0; }
+.welcome-audience>div:first-child p { margin: 6px 0 0; color: #778397; font-size: 13px; line-height: 1.5; }
+.audience-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.audience-pills>span { flex: 1 1 170px; display: grid; gap: 3px; padding: 10px 12px; border: 1px solid #e7e9f0; border-radius: 8px; background: #fff; color: #35435a; font-size: 13px; font-weight: 700; }
+.audience-pills small { color: #818c9b; font-size: 11px; font-weight: 400; }
+.welcome-how { padding-top: 20px; }
+.welcome-how .strip-heading>p { margin: -8px 0 15px; color: #778397; font-size: 13px; }
+.welcome-how .how-grid article { min-height: 120px; }
+.welcome-how .how-grid h3 { font-size: 14px; }
+.welcome-how .how-grid p { font-size: 12px; }
+.welcome-page :is(a,button,input,select):focus-visible { outline: 3px solid #8e89f3; outline-offset: 3px; }
+@media(max-width:760px) {
+  .welcome-quick-launch { margin-top: 9px; padding: 12px; }
+  .welcome-quick-head { align-items: stretch; flex-direction: column; }
+  .welcome-skip-button { width: 100%; }
+  .welcome-quick-links { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .welcome-quick-links a { justify-content: center; min-height: 40px; padding: 5px 8px; text-align: center; }
+  .welcome-quick-links a:last-child { grid-column: 1/-1; }
+  .welcome-guide-hero { padding: 30px 0 24px; }
+  .welcome-guide-hero h1 { font-size: 35px; letter-spacing: -1.1px; }
+  .welcome-analogy { grid-template-columns: 30px 1fr; gap: 9px; padding: 13px; }
+  .analogy-icon { width: 30px; height: 30px; }
+  .welcome-analogy p { font-size: 13px; }
+  .welcome-check-grid,.welcome-audience { grid-template-columns: 1fr; }
+  .welcome-audience { gap: 10px; }
+  .audience-pills { display: grid; grid-template-columns: 1fr; }
+  .welcome-check-grid article { padding: 12px; }
+}
