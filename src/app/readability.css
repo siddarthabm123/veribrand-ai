@@ -1,0 +1,48 @@
+/* Shared type scale: keep dense product data readable without changing the visual system. */
+.welcome-page,.app-shell,.passport-page,.disclosure-page { font-size: 14px; }
+.welcome-page small,.app-shell small,.passport-page small,.disclosure-page small { font-size: 12px; }
+.welcome-page :is(.welcome-nav>div,.welcome-nav>a:last-child,.welcome-badge,.welcome-primary,.welcome-secondary,.welcome-assurance span,.strip-heading>span,.persona-intro>div:first-child>span,.how-top span,.persona-demo-tag,.persona-copy b,.persona-copy small,.custom-persona label span,.custom-persona input,.custom-persona select,.custom-persona button,.welcome-proof b,.welcome-proof small,.welcome-footer,.welcome-footer>a,.tour-step-label,.tour-target b,.tour-target small,.tour-back,.tour-next,.tour-jump) { font-size: 11px !important; }
+.welcome-page .welcome-subtitle { font-size: 16px !important; line-height: 1.7; }
+.welcome-page .how-grid h3 { font-size: 14px !important; }
+.welcome-page .how-grid p,.welcome-page .persona-intro p,.welcome-page .persona-copy em,.welcome-page .tour-dialog>p { font-size: 13px !important; }
+.welcome-page .strip-heading h2,.welcome-page .persona-intro h2 { font-size: 20px; }
+.welcome-page .custom-persona input,.welcome-page .custom-persona select { min-height: 38px; }
+.welcome-page .custom-persona button,.welcome-page .welcome-primary,.welcome-page .welcome-secondary,.welcome-page .tour-back,.welcome-page .tour-next,.welcome-page .tour-jump { min-height: 40px; }
+.welcome-page .tour-target b { font-size: 13px !important; }
+.welcome-page .tour-target small { font-size: 12px !important; }
+.app-shell :is(.brand small,.workspace-switch small,.profile small,.side-label,.sidebar-note>b,.sidebar-note p,.sidebar-note span,.system-status,.role-select,.role-select select,.eyebrow,.page-heading p,.primary-btn,.secondary-btn,.judge-banner b,.judge-banner p,.text-link,.stat-top,.stat-card>small,.panel-head p,.queue-actions select,.table-head,.submission-name b,.submission-name small,.status,.author,.time,.table-foot,.table-foot button,.radar-score>div:nth-child(2) b,.radar-score>div:nth-child(2) small,.radar-rows>div>span,.radar-rows>div>b,.radar-link,.footer,.field-label,.editor-foot,.audit-submit>span,.aside-card p,.check-item,.doc-section,.doc-annotation,.history-block p,.finding-head,.rule-cite,.finding-explain,.source-quote,.intent-bar,.finding-actions button,.comment,.comment-input input,.comment-input button,.signoff small,.guideline-row small,.fact-row,.terminology-panel p,.knowledge-footer,.analytics-cards .stat-card>small,.analytics-cards .stat-card>span,.chart-y,.bar-group>span,.chart-legend,.top-rules>div>span,.top-rules>div>strong,.architecture-flow>div>span,.architecture-flow b,.architecture-flow small,.architecture h3,.disclosure-table b,.disclosure-table span,.disclosure-table small,.roadmap-item>span,.roadmap-item b,.roadmap-item p,.team-card b,.team-card small) { font-size: 12px !important; }
+.app-shell :is(.sidebar nav a,.workspace-switch b,.profile b,.submission-name small,.author,.time,.panel-head p,.table-foot,.footer,.field-label,.editor-foot,.aside-card p,.check-item,.doc-annotation,.history-block p,.finding-explain,.source-quote,.comment,.guideline-row small,.fact-row,.disclosure-table span,.roadmap-item p,.team-card small) { font-size: 13px !important; }
+.app-shell :is(.panel-head h2,.aside-card h3,.doc-body>p,.diff,.guideline-row b,.terminology-panel h2,.top-rules>div b) { font-size: 15px; }
+.app-shell :is(.sidebar nav a,.role-select select,.queue-actions select,.panel-head select,.primary-btn,.secondary-btn,.table-foot button,.finding-actions button,.comment-input button) { min-height: 38px; }
+.app-shell .icon-btn { min-width: 38px; min-height: 38px; }
+.app-shell :is(.rule-id,.severity-pill,.count-badge,.doc-tag) { font-size: 11px !important; }
+.passport-page :is(.passport-kicker,.passport-pills span,.demo-live,.section-overline,.passport-input-label,.live-check,.risk-tag,.evidence-item-top code,.evidence-source,.evidence-source small,.apply-recommendation,.ledger-foot,.passport-metrics span,.passport-metrics b,.passport-metrics small,.passport-export b,.passport-export p,.passport-export button,.passport-footer,.passport-footer>a,.review-role,.passport-record-id,.room-card h2 span,.room-history h3,.room-history p,.room-rule b,.room-rule span,.room-rule em,.room-finding>p,.room-finding blockquote,.room-comments>p,.room-comment-entry input,.room-comment-entry button,.room-signoff p,.room-signoff>button,.review-message) { font-size: 12px !important; }
+.passport-page :is(.passport-hero>p,.workbench-copy>p,.evidence-item>p,.room-history p,.room-finding>p,.room-finding blockquote,.room-signoff p) { font-size: 14px !important; line-height: 1.6; }
+.passport-page .evidence-phrase { font-size: 14px; }
+.passport-page :is(.passport-input-label,.live-check,.risk-tag,.evidence-source small,.passport-metrics span,.passport-footer,.passport-footer>a,.passport-record-id,.room-rule b,.room-rule span,.room-rule em) { font-size: 11px !important; }
+.passport-page :is(.apply-recommendation,.passport-export button,.room-actions button,.room-comment-entry button,.room-signoff>button) { min-height: 38px; }
+.disclosure-page :is(.disclosure-back,.disclosure-passport,.disclosure-kicker,.disclosure-number,.problem-tags span,.architecture-steps b,.architecture-steps p,.disclosure-table b,.disclosure-table span,.disclosure-table small,.disclosure-footer) { font-size: 12px !important; }
+.disclosure-page :is(.disclosure-hero>p,.disclosure-section>p,.architecture-steps p) { font-size: 14px !important; line-height: 1.65; }
+.disclosure-page .disclosure-section h2 { font-size: 18px; }
+.guideline-form { display: grid; gap: 12px; padding: 16px 18px; border-top: 1px solid #edf0f4; background: #fafbff; }
+.guideline-form label { display: grid; gap: 6px; color: #59677a; font-size: 13px; font-weight: 600; }
+.guideline-form input,.guideline-form textarea { width: 100%; border: 1px solid #dfe4ed; border-radius: 7px; padding: 10px 11px; color: #25334a; background: white; font: inherit; }
+.guideline-form textarea { min-height: 90px; resize: vertical; }
+.guideline-form .primary-btn { justify-self: start; }
+.knowledge-footer small { display: flex; align-items: center; gap: 5px; }
+.analytics-live-chart { display: grid; gap: 15px; padding: 18px 20px; min-height: 220px; align-content: center; }
+.analytics-live-row { display: grid; grid-template-columns: minmax(110px, 1fr) 36px minmax(90px, 2fr); align-items: center; gap: 12px; color: #59677a; font-size: 13px; }
+.analytics-live-row>b { text-align: right; color: #26344b; }
+.analytics-live-row>i { height: 9px; background: #f0f1f5; border-radius: 8px; overflow: hidden; }
+.analytics-live-row>i>em { display: block; height: 100%; border-radius: inherit; background: #6e65e9; transition: width .25s ease; }
+.analytics-message { padding: 18px 20px; color: #788598; font-size: 13px; }
+.analytics-live-chart+.chart-legend { padding: 0 20px 15px; }
+.violet-bg { background: #9b6dd7; }
+@media (max-width: 760px) {
+  .welcome-page .welcome-subtitle { font-size: 15px !important; }
+  .welcome-page .how-grid p,.welcome-page .persona-intro p,.welcome-page .persona-copy em { font-size: 13px !important; }
+  .app-shell .content { padding-left: 16px; padding-right: 16px; }
+  .app-shell :is(.page-heading p,.panel-head p,.submission-name small,.status,.author,.time,.footer,.guideline-row small,.fact-row,.comment,.disclosure-table span,.roadmap-item p) { font-size: 12px !important; }
+  .passport-page :is(.passport-hero>p,.workbench-copy>p,.evidence-item>p) { font-size: 14px !important; }
+  .disclosure-page :is(.disclosure-hero>p,.disclosure-section>p) { font-size: 14px !important; }
+}

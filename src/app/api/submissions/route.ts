@@ -1,0 +1,1 @@
+import{getSubmissions,createSubmission}from'@/lib/repository';import{normalizeCustomRules}from'@/lib/custom-guidelines';export async function GET(){return Response.json(await getSubmissions())}export async function POST(r:Request){const input=await r.json();return Response.json(await createSubmission({...input,customRules:normalizeCustomRules(input.customRules)}))}

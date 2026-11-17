@@ -1,0 +1,1 @@
+import{getKnowledge}from'@/lib/repository';export async function GET(){return Response.json(await getKnowledge())}export async function POST(r:Request){return Response.json({ok:true,entry:await r.json()})}

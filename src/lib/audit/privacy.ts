@@ -1,0 +1,1 @@
+export function redactSensitiveData(t:string){return t.replace(/[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/g,'[REDACTED EMAIL]').replace(/\b(?:\+?\d[\d ()-]{7,}\d)\b/g,'[REDACTED PHONE]').replace(/\bsk-[A-Za-z0-9_-]{8,}\b/g,'[REDACTED API KEY]').replace(/Bearer\s+[A-Za-z0-9._-]+/gi,'Bearer [REDACTED TOKEN]')}
