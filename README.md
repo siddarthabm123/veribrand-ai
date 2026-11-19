@@ -76,11 +76,9 @@ The supplied event rules permit AI and existing libraries but require disclosure
 
 | Team member (full name) | Role | Individual contribution / evidence |
 | --- | --- | --- |
-| Siddartha B M | AI Audit Engine, Custom Rules & Retrieval Architecture | Deterministic and custom-rule audit flow, evidence citations, and retrieval architecture. |
-| [Teammate 2 Name] | Next.js Diff Workspace, Brand Passport & Visual WCAG Inspector | Review workspace and diffs, Brand Passport workflow, and visual contrast inspection. |
-| [Teammate 3 Name] | Gap Radar Analytics, Session State & End-to-End QA | Workspace analytics, session persistence, and end-to-end quality checks. |
-
-Each teammate should complete any required individual form. Confirm the remaining two participant names and spellings before submitting the event form.
+| Siddartha B M | AI Audit Engine, Custom Rules & Retrieval Architecture | Deterministic and custom-rule audit flow, evidence citations, and retrieval architecture. |Workspace analytics, session persistence, and end-to-end quality checks. |
+|G Raghav kumar] | Next.js Diff Workspace, Brand Passport & Visual WCAG Inspector | Review workspace and diffs, Brand Passport workflow, and visual contrast inspection. |Gap Radar Analytics, Session State & End-to-End QA |
+ 
 
 ## Limitations and responsible use
 
