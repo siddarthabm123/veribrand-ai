@@ -1,0 +1,61 @@
+/* Hallmark · theme: Studio · scope: app · redesign: restyle · genre: editorial · nav: existing workspace sidebar · footer: existing colophon · v2.0.0 */
+/* Hallmark · pre-emit critique: keep every product control and improve hierarchy with a dark sidebar and a restrained paper workspace. */
+.app-shell { background: var(--vb-paper); color: var(--vb-ink); font-family: var(--vb-font-body); --base: var(--vb-paper); --ink: var(--vb-ink); --line: var(--vb-rule); --muted: var(--vb-muted); --authority: var(--vb-ink-2); --accent: var(--vb-orange); }
+.app-shell .sidebar { background: var(--vb-ink); color: var(--vb-paper); border-right: 0; padding-top: 32px; }
+.app-shell .brand { padding-bottom: 32px; }
+.app-shell .brand-mark { background: var(--vb-clear); color: var(--vb-paper); box-shadow: none; }
+.app-shell .brand b { font-weight: 500; font-size: 21px; }
+.app-shell .brand b span { color: var(--vb-light-muted); }
+.app-shell .brand small { color: var(--vb-light-muted); letter-spacing: 0; font-weight: 400; text-transform: none; }
+.app-shell .workspace-switch { border-color: var(--vb-dark-rule); border-radius: 3px; margin-bottom: 28px; }
+.app-shell .workspace-switch small, .app-shell .profile small { color: var(--vb-light-muted); }
+.app-shell .acme-mark, .app-shell .sidebar .avatar { background: var(--vb-dark-rule); color: var(--vb-paper); border-radius: 3px; }
+.app-shell .side-label { color: var(--vb-light-muted); letter-spacing: 0; font-weight: 400; padding-bottom: 12px; }
+.app-shell .sidebar nav { gap: 8px; }
+.app-shell .sidebar nav a { min-height: 44px; color: var(--vb-light-muted); font-weight: 400; border-radius: 2px; }
+.app-shell .sidebar nav a svg { color: inherit; }
+.app-shell .sidebar nav a.active { background: var(--vb-dark-rule); color: var(--vb-paper); }
+.app-shell .sidebar nav a.active svg { color: var(--vb-paper); }
+.app-shell .sidebar nav a:hover { background: var(--vb-dark-rule); color: var(--vb-paper); }
+.app-shell .sidebar :focus-visible { outline-color: var(--vb-orange); }
+.app-shell .sidebar-note { background: var(--vb-clear); border-color: var(--vb-dark-rule); border-radius: 3px; padding: 16px; }
+.app-shell .sidebar-note p, .app-shell .sidebar-note span { color: var(--vb-light-muted); }
+.app-shell .sidebar-note .note-icon { color: var(--vb-orange); }
+.app-shell .profile-session-wrap { border-color: var(--vb-dark-rule); }
+.app-shell .profile-session { color: var(--vb-paper); }
+.app-shell .topbar { background: var(--vb-paper); border-bottom-color: var(--vb-rule); min-height: 76px; }
+.app-shell .content { padding-top: 40px; }
+.app-shell .page-heading { margin-bottom: 28px; }
+.app-shell .page-heading h1 { font-family: var(--vb-font-display); font-size: 40px; font-weight: 400; letter-spacing: -1.5px; line-height: 1.12; margin-bottom: 12px; }
+.app-shell .page-heading p { color: var(--vb-muted); }
+.app-shell .primary-btn { background: var(--vb-orange); color: var(--vb-ink); box-shadow: none; border: 1px solid var(--vb-ink); border-radius: 3px; font-weight: 500; }
+.app-shell .primary-btn:hover { background: var(--vb-orange-hover); }
+.app-shell .secondary-btn { background: var(--vb-white); color: var(--vb-ink); border-color: var(--vb-rule); border-radius: 3px; }
+.app-shell .secondary-btn:hover { background: var(--vb-paper-2); }
+.app-shell .judge-banner { background: var(--vb-paper-2); border-color: var(--vb-clear); border-radius: 3px; padding: 16px; margin-bottom: 24px; }
+.app-shell .judge-icon { background: var(--vb-clear); color: var(--vb-ink-2); }
+.app-shell .text-link { color: var(--vb-ink-2); }
+.app-shell .stat-grid { gap: 16px; margin-bottom: 24px; }
+.app-shell .stat-card { background: var(--vb-white); border: 0; border-top: 2px solid var(--vb-rule); border-radius: 0; padding: 20px; min-height: 155px; }
+.app-shell .stat-card > strong { font-family: var(--vb-font-display); font-weight: 400; font-size: 38px; color: var(--vb-ink); font-variant-numeric: tabular-nums; }
+.app-shell .stat-icon { background: var(--vb-clear); color: var(--vb-muted); }
+.app-shell .panel { background: var(--vb-white); border-color: var(--vb-rule); border-radius: 3px; box-shadow: none; }
+.app-shell .panel-head { padding-block: 24px; }
+.app-shell .panel-head h2 { font-family: var(--vb-font-body); font-size: 17px; font-weight: 500; }
+.app-shell .table-head { background: var(--vb-paper-2); color: var(--vb-muted); letter-spacing: 0; min-height: 40px; font-weight: 400; }
+.app-shell .submission-row { min-height: 75px; border-color: var(--vb-paper-2); }
+.app-shell .submission-row:hover { background: var(--vb-paper); }
+.app-shell .content-icon { background: var(--vb-paper-2); color: var(--vb-ink-2); }
+.app-shell .submission-name b { font-weight: 500; }
+.app-shell .footer { padding-block: 24px; }
+.app-shell .eyebrow { letter-spacing: 0; color: var(--vb-muted); }
+.app-shell :is(button,select,input,textarea,a):focus-visible { outline: 2px solid var(--vb-focus); outline-offset: 3px; }
+.app-shell button:disabled { opacity: .55; cursor: not-allowed; }
+.passport-launcher { background: var(--vb-ink); color: var(--vb-paper); border-color: var(--vb-dark-rule); box-shadow: none; font-family: var(--vb-font-body); }
+.passport-launcher > span { background: var(--vb-clear); color: var(--vb-paper); }
+.passport-launcher:hover { background: var(--vb-ink-2); }
+.passport-page, .disclosure-page { font-family: var(--vb-font-body); }
+.passport-page .passport-hero h1, .disclosure-page h1 { font-family: var(--vb-font-display); font-weight: 400; }
+.passport-page .passport-hero h1 em { color: inherit; }
+@media (max-width: 760px) { .app-shell .page-heading h1 { font-size: 32px; } .app-shell .content { padding-top: 24px; } }
+@media (prefers-reduced-motion: reduce) { .app-shell *, .passport-page *, .disclosure-page * { animation: none !important; transition: none !important; } }

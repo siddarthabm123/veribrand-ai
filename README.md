@@ -1,5 +1,22 @@
 # VeriBrand AI — Team ArticXCoders
 
+## Studio redesign
+
+The landing page has an animated CSS 3D identity, responsive editorial typography, locally hosted fonts, quick workspace links, and a real audit screenshot. The workspace uses a coordinated dark green sidebar and paper surfaces. The monogram rotates continuously; explicit pause, off-screen suspension, and reduced-motion support remain available.
+
+Run `npm ci`, then `npm run dev`. Open `/welcome` for the introduction and choose **Explore workspace** to enter the demo. Assets use the existing product, with Geist and Hedvig Letters Serif licenses in `public/fonts`.
+
+Validation: TypeScript and lint passed for the changed components; browser checks covered 320–1920px layouts, animation controls, role entry, session persistence, Brand Passport fixes and review saving, main routes, and rendering without JavaScript. Production build verification remains pending: this Windows environment stalled in Turbopack, while Webpack compiled and passed TypeScript but hit an EPERM filesystem error during prerendering. Require a successful hosted preview build before merging.
+
+### Deploying these changes on Vercel
+
+1. Review the pull request and its preview deployment. Test `/welcome`, workspace entry, and the Brand Passport review flow. Merge only after the build passes.
+2. If this repository is already connected to Vercel and `main` is its production branch, merging to `main` normally starts a production deployment automatically. Confirm it reaches **Ready** in Vercel.
+3. For a first deployment, the repository owner imports this GitHub repository in Vercel, selects **Next.js**, keeps the repository root as the root directory, and uses the normal Next.js build/output defaults. No environment variables are required for the seeded demo; preserve any optional credentials already configured on the existing project.
+4. Check the resulting production URL. Do not change the current project’s domain or access settings to publish this visual update.
+
+Deployment behavior: https://vercel.com/docs/git/vercel-for-github
+
 An explainable brand-governance workspace for checking copy and campaign assets before publication. The Acme Cloud demo workspace is pre-seeded so judges can try it without an account, API key, or database setup.
 
 ## Project overview

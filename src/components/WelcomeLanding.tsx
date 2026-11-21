@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, BadgeCheck, BookOpenCheck, Check, Contrast, FileCheck2, LockKeyhole, Palette, ScanSearch, ShieldCheck, Sparkles, UserRound } from 'lucide-react';
+import { Check, ChevronDown, Contrast, FileCheck2, LockKeyhole, Palette, ScanSearch, ShieldCheck, Sparkles, UserRound } from 'lucide-react';
+import BrandSculpture from '@/components/BrandSculpture';
 import { saveSession, type ActiveSession, type WorkspaceRole } from '@/lib/session';
 
 const personas: Array<{ name: string; role: WorkspaceRole; initials: string; color: string; note: string }> = [
@@ -12,16 +14,10 @@ const personas: Array<{ name: string; role: WorkspaceRole; initials: string; col
 ];
 
 const checks = [
-  { icon: ScanSearch, title: 'Wrong Numbers & Fake Claims', text: 'Checks product stats and promises against your company’s verified fact sheet.' },
-  { icon: Sparkles, title: 'Tone & Banned Words', text: 'Catches hype or off-brand wording and suggests a fix that keeps the writer’s natural voice.' },
-  { icon: Palette, title: 'Brand Colors & Readability', text: 'Checks design colors against your palette and checks whether text is easy to read.' },
-  { icon: LockKeyhole, title: 'Human Approval & Privacy', text: 'Masks sensitive emails and API keys before optional AI review. A person stays in control of every change.' },
-];
-
-const steps = [
-  { icon: UserRound, number: '01', title: 'Pick a role below', text: 'Choose Content Creator, Brand Reviewer, or Brand Admin to enter the demo.' },
-  { icon: BookOpenCheck, number: '02', title: 'Check rules, then test a draft', text: 'Open Brand Knowledge, then try New Audit or the 30-second Brand Passport.' },
-  { icon: FileCheck2, number: '03', title: 'Review and approve', text: 'Accept a suggested fix or record an override in the Review Room, then approve the draft.' },
+  { icon: ScanSearch, title: 'Claims that hold up', text: 'Checks product promises against your verified fact sheet.' },
+  { icon: Sparkles, title: 'A voice that stays yours', text: 'Catches off-brand wording. Suggests fixes that preserve your intent.' },
+  { icon: Palette, title: 'Colors you can read', text: 'Checks your palette and measures text contrast.' },
+  { icon: LockKeyhole, title: 'Privacy before review', text: 'Masks emails and API keys before optional AI review.' },
 ];
 
 export default function WelcomeLanding({ onEnter }: { onEnter?: (session: ActiveSession) => void }) {
@@ -42,33 +38,43 @@ export default function WelcomeLanding({ onEnter }: { onEnter?: (session: Active
     { label: 'Gap Radar Analytics', href: '/analytics' },
   ];
 
-  return <main className="welcome-page">
-    <section className="welcome-quick-launch" aria-label="Skip the guide and jump to a section">
-      <div className="welcome-quick-head"><div><span>RETURNING USER OR JUDGE?</span><b>Skip intro &amp; jump directly</b></div><button className="welcome-skip-button" onClick={() => enter('Alex Morgan', 'Brand Reviewer')}>Skip Guide &amp; Open Workspace <ArrowRight size={16}/></button></div>
-      <nav className="welcome-quick-links" aria-label="Quick jump">{quickLinks.map((item) => item.overview
-        ? <Link key={item.href} href={item.href} onClick={(event) => { event.preventDefault(); enter('Alex Morgan', 'Brand Reviewer'); }}>{item.label}<ArrowRight size={13}/></Link>
-        : <Link key={item.href} href={item.href}>{item.label}<ArrowRight size={13}/></Link>)}</nav>
+  return <main className="vb-site">
+    <a className="vb-skip" href="#main-content">Skip to content</a>
+    <header className="vb-header vb-container">
+      <Link href="/welcome" className="vb-logo" aria-label="VeriBrand AI home"><ShieldCheck size={28} strokeWidth={1.5} aria-hidden="true" /><span>VeriBrand<span className="vb-logo-ai"> AI</span></span></Link>
+      <nav className="vb-navigation" aria-label="Main navigation"><a href="#product">The workspace</a><a href="#checks">What we check</a><a href="#roles">Your role</a></nav>
+      <details className="vb-quickmenu"><summary>Quick access<ChevronDown size={14} aria-hidden="true"/></summary><nav aria-label="Workspace shortcuts">{quickLinks.map((item) => item.overview ? <Link href={item.href} key={item.href} onClick={(event) => { event.preventDefault(); enter('Alex Morgan', 'Brand Reviewer'); }}>{item.label}</Link> : <Link href={item.href} key={item.href}>{item.label}</Link>)}</nav></details>
+      <button className="vb-nav-action" type="button" onClick={() => enter('Alex Morgan', 'Brand Reviewer')}>Open workspace</button>
+    </header>
+    <section className="vb-hero vb-container" id="main-content">
+      <div className="vb-hero-copy">
+        <h1>Keep your<br/>brand’s word.</h1>
+        <p>Check claims, copy, and colors before your brand goes public.</p>
+        <div className="vb-hero-actions"><button className="vb-button" type="button" onClick={() => enter('Alex Morgan', 'Brand Reviewer')}>Explore workspace</button><a className="vb-text-link" href="/impact">Try Brand Passport</a></div>
+      </div>
+      <BrandSculpture />
+      <div className="vb-hero-foot"><span><Check size={16} aria-hidden="true" />No account required</span><span><LockKeyhole size={16} aria-hidden="true" />Human sign-off, always</span><a href="#product">See what’s inside<ChevronDown size={16} aria-hidden="true" /></a></div>
     </section>
-
-    <nav className="welcome-nav"><Link href="/welcome" className="welcome-logo"><span><ShieldCheck size={18}/></span><b>VeriBrand<span> AI</span></b></Link><div><span className="demo-dot"/> Acme Cloud demo</div><Link href="/disclosures">How we built this <ArrowRight size={13}/></Link></nav>
-
-    <section className="welcome-hero welcome-guide-hero">
-      <div className="welcome-badge"><Sparkles size={13}/> Team ArticXCoders <i/> CodeZen India 2026 (Inkloom AI Challenge)</div>
-      <span className="welcome-guide-kicker">UNDERSTAND VERIBRAND AI IN 30 SECONDS</span>
-      <h1>Your Brand’s Pre-Publish<br/>Quality Gate—Explained Simply.</h1>
-      <div className="welcome-analogy"><span className="analogy-icon"><ShieldCheck size={19}/></span><div><b>The Head Chef at the Kitchen Pass</b><p>Think of a busy restaurant kitchen. Before any plate leaves the kitchen for a customer’s table, the head chef checks it—making sure the ingredients are right and nothing unsafe goes out. Today, companies have dozens of writers, agencies, and AI tools publishing blogs, ads, and posters at once. VeriBrand AI is that head chef sitting right between “Save Draft” and “Publish”—catching wrong product numbers, off-brand colors, and risky claims before the public ever sees them.</p></div></div>
-      <div className="welcome-assurance"><span><Check size={12}/> No account required</span><span><Check size={12}/> Demo data is ready</span><span><LockKeyhole size={12}/> Human sign-off stays in control</span></div>
+    <section className="vb-product" id="product">
+      <div className="vb-container">
+        <div className="vb-section-head"><h2>A second look.<br/>Before the world looks.</h2><p>From first draft to human approval.<br/>Every finding comes with its source.</p></div>
+        <figure className="vb-product-shot"><Image src="/images/workspace.png" width={1440} height={900} sizes="(max-width: 1440px) 90vw, 1296px" alt="VeriBrand’s actual audit workspace, showing the draft editor and audit controls"/><figcaption><span>The pre-seeded demo workspace</span><Link href="/audit/new">Run a new audit</Link></figcaption></figure>
+        <ol className="vb-workflow"><li><h3>Know the rules.</h3><p>Open <Link href="/knowledge">Brand Knowledge</Link> for approved facts.</p></li><li><h3>Test a draft.</h3><p>Run a <Link href="/audit/new">new audit</Link> or try <Link href="/impact">Brand Passport</Link>.</p></li><li><h3>Review and approve.</h3><p>Accept a fix or record an override in the <Link href="/review/launch-blog">Review Room</Link>.</p></li></ol>
+        <nav className="vb-product-links" aria-label="Quick jump">{quickLinks.map((item) => item.overview ? <Link href={item.href} key={item.href} onClick={(event) => { event.preventDefault(); enter('Alex Morgan', 'Brand Reviewer'); }}>{item.label}</Link> : <Link href={item.href} key={item.href}>{item.label}</Link>)}</nav>
+      </div>
     </section>
-
-    <section className="welcome-checks"><div className="strip-heading"><span>WHAT IT CHECKS</span><h2>A simple check before your work goes public.</h2></div><div className="welcome-check-grid">{checks.map(({ icon: Icon, title, text }) => <article key={title}><span><Icon size={18}/></span><div><h3>{title}</h3><p>{text}</p></div></article>)}</div></section>
-
-    <section className="welcome-audience"><div><span className="audience-heading">WHO IS IT FOR?</span><p>One shared brand rulebook, with a useful view for each person.</p></div><div className="audience-pills"><span>Writers &amp; Creators <small>Fast feedback while drafting</small></span><span>Brand Reviewers <small>Faster checks with rule citations</small></span><span>Founders &amp; Admins <small>See repeated team mistakes</small></span></div></section>
-
-    <section className="how-strip welcome-how"><div className="strip-heading"><span>HOW TO USE IT</span><h2>Three steps from draft to approval.</h2><p>Choose a role below to start the demo.</p></div><div className="how-grid">{steps.map(({ icon: Icon, number, title, text }) => <article key={number}><div className="how-top"><span>{number}</span><Icon size={18}/></div><h3>{title}</h3><p>{text}</p></article>)}</div></section>
-
-    <section className="persona-section" id="roles"><div className="persona-intro"><div><span>STEP 1 · CHOOSE YOUR ROLE</span><h2>Start with one click.</h2><p>Use a demo teammate or enter your own name. You can switch users later.</p></div><div className="persona-demo-tag"><BadgeCheck size={15}/> Safe demo workspace</div></div><div className="persona-grid">{personas.map((persona) => <button className="persona-card" key={persona.name} onClick={() => enter(persona.name, persona.role)}><span className={'persona-avatar '+persona.color}>{persona.initials}</span><span className="persona-copy"><b>{persona.name}</b><small>{persona.role}</small><em>{persona.note}</em></span><ArrowRight size={16}/></button>)}</div><form className="custom-persona" onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); const name = String(data.get('name') ?? '').trim(); const role = String(data.get('role') ?? 'Content Creator') as WorkspaceRole; if (name) enter(name, role); }}><UserRound size={16}/><label><span>Or use your name</span><input name="name" placeholder="Your name" maxLength={48} required/></label><label><span>Workspace role</span><select name="role" defaultValue="Content Creator"><option>Content Creator</option><option>Brand Reviewer</option><option>Brand Admin</option></select></label><button type="submit">Enter workspace <ArrowRight size={14}/></button></form></section>
-
-    <section className="welcome-proof"><div><span><Contrast size={16}/></span><b>Exact contrast math</b><small>WCAG ratio with a clear pass/fail</small></div><div><span><Palette size={16}/></span><b>Brand color guardrails</b><small>Preview palette choices before publishing</small></div><div><span><BadgeCheck size={16}/></span><b>Evidence you can inspect</b><small>Rule citations, reviewer trail, exportable record</small></div></section>
-    <footer className="welcome-footer"><span>VERIBRAND AI <i/> TEAM ARTICXCODERS</span><span>CodeZen India 2026 · Brand Governance Demo</span><Link href="/disclosures">AI &amp; tools disclosure <ArrowRight size={12}/></Link></footer>
+    <section className="vb-checks vb-container" id="checks">
+      <div className="vb-check-intro"><h2>Small details.<br/>Your whole reputation.</h2><p>A shared rulebook for the things your brand puts into the world.</p><Link className="vb-text-link" href="/knowledge">Explore brand knowledge</Link></div>
+      <div className="vb-check-list">{checks.map(({ icon: Icon, title, text }) => <article key={title}><Icon size={24} strokeWidth={1.5} aria-hidden="true"/><div><h3>{title}</h3><p>{text}</p></div></article>)}</div>
+    </section>
+    <section className="vb-human">
+      <div className="vb-container vb-human-layout"><div className="vb-human-type" aria-hidden="true">Human<br/>by design.</div><div className="vb-human-copy"><ShieldCheck size={40} strokeWidth={1} aria-hidden="true"/><h2>The final word<br/>is still yours.</h2><p>Accept a focused fix. Record an override. Leave a comment. You decide what gets published.</p><div className="vb-human-details"><span><Contrast size={20} aria-hidden="true"/>Exact WCAG contrast</span><span><FileCheck2 size={20} aria-hidden="true"/>Exportable review record</span></div><Link className="vb-light-link" href="/impact">Open Brand Passport</Link></div></div>
+    </section>
+    <section className="vb-roles vb-container" id="roles">
+      <div className="vb-section-head"><h2>One brand.<br/>A seat for everyone.</h2><p>Choose a demo teammate to begin.<br/>You can switch roles in the workspace.</p></div>
+      <div className="vb-personas">{personas.map((persona) => <button type="button" className="vb-persona" key={persona.name} onClick={() => enter(persona.name, persona.role)}><span className="vb-persona-initials">{persona.initials}</span><span className="vb-persona-copy"><small>{persona.role}</small><b>{persona.name}</b><span>{persona.note}</span></span><span className="vb-persona-enter">Enter</span></button>)}</div>
+      <details className="vb-custom-persona"><summary><UserRound size={20} aria-hidden="true"/>Prefer your own name?<ChevronDown size={16} aria-hidden="true"/></summary><form onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); const name = String(data.get('name') ?? '').trim(); const role = String(data.get('role') ?? 'Content Creator') as WorkspaceRole; if (name) enter(name, role); }}><label>Your name<input name="name" autoComplete="name" placeholder="Your name" maxLength={48} required pattern=".*\S.*"/></label><label>Workspace role<select name="role" defaultValue="Content Creator"><option>Content Creator</option><option>Brand Reviewer</option><option>Brand Admin</option></select></label><button type="submit" className="vb-button">Enter workspace</button></form></details>
+    </section>
+    <footer className="vb-footer"><div className="vb-container"><div className="vb-footer-top"><Link className="vb-logo" href="/welcome"><ShieldCheck size={28} strokeWidth={1.5} aria-hidden="true"/>VeriBrand AI</Link><p>Built by Team ArticXCoders.<br/>CodeZen India 2026, Inkloom AI Challenge.</p><div><Link href="/disclosures">How we built this</Link><Link href="/disclosures">AI &amp; tools disclosure</Link></div></div><div className="vb-footer-wordmark" aria-hidden="true">VeriBrand.</div><div className="vb-colophon"><span>Brand governance, with a human in the loop.</span><span>A live brand governance demo</span></div></div></footer>
   </main>;
 }

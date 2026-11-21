@@ -16,7 +16,7 @@ function subscribe(listener: () => void) {
 
 export default function WelcomeGate() {
   const session = useSyncExternalStore(subscribe, readSession, () => undefined);
-  if (session === undefined) return <main className="welcome-loading" aria-busy="true">Loading VeriBrand AI…</main>;
+  if (session === undefined) return <WelcomeLanding onEnter={saveSession} />;
   if (session?.entered) return <Suspense fallback={<main className="welcome-loading" aria-busy="true">Opening workspace…</main>}><Workspace /></Suspense>;
   return <WelcomeLanding onEnter={saveSession} />;
 }
