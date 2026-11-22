@@ -1,6 +1,10 @@
 /* Hallmark · theme: Studio · scope: app · redesign: restyle · genre: editorial · nav: existing workspace sidebar · footer: existing colophon · v2.0.0 */
 /* Hallmark · pre-emit critique: keep every product control and improve hierarchy with a dark sidebar and a restrained paper workspace. */
 .app-shell { background: var(--vb-paper); color: var(--vb-ink); font-family: var(--vb-font-body); --base: var(--vb-paper); --ink: var(--vb-ink); --line: var(--vb-rule); --muted: var(--vb-muted); --authority: var(--vb-ink-2); --accent: var(--vb-orange); }
+/* Keep the dense workspace UI on a reliable system font; the decorative display font is reserved for the marketing pages. */
+.app-shell, .app-shell :is(h1,h2,h3,p,span,b,strong,small,label,button,a,select,input,textarea,del) { font-family: Arial, Helvetica, sans-serif !important; font-variant-ligatures: none; font-kerning: normal; }
+.app-shell :is(h1,h2,h3,p,span,b,strong,small,label,button,a,select,input,textarea,del) { letter-spacing: normal; }
+.app-shell :is(p,small) { line-height: 1.5; }
 .app-shell .sidebar { background: var(--vb-ink); color: var(--vb-paper); border-right: 0; padding-top: 32px; }
 .app-shell .brand { padding-bottom: 32px; }
 .app-shell .brand-mark { background: var(--vb-clear); color: var(--vb-paper); box-shadow: none; }
