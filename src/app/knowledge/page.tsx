@@ -1,1 +1,5 @@
-import{Suspense}from'react';import Workspace from'@/components/Workspace';export default function Page(){return <Suspense fallback={<div/>}><Workspace/></Suspense>}
+import Workspace from '@/components/Workspace';
+
+export default function KnowledgeRoute() {
+  return <Workspace />;
+}

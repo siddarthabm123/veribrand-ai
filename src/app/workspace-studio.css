@@ -54,30 +54,6 @@
 .app-shell .terminology-panel > div { flex-wrap: wrap; gap: 8px; min-height: 44px; font-size: 13px; line-height: 1.45; overflow-wrap: anywhere; }
 .app-shell .knowledge-footer { font-size: 13px; line-height: 1.5; }
 .app-shell .knowledge-footer small { display: flex; align-items: center; gap: 6px; margin: 6px 0 0; font-size: 12px; line-height: 1.45; }
-/* Keep the knowledge view on a single, predictable text baseline. The shared
-   readability scale raises small text sizes; without explicit line heights,
-   older cached/combined styles can make the rows paint on top of each other. */
-.app-shell .knowledge-grid,
-.app-shell .knowledge-grid * { text-shadow: none; }
-.app-shell .knowledge-grid .panel-head h2,
-.app-shell .knowledge-grid .panel-head p,
-.app-shell .knowledge-grid .guideline-row b,
-.app-shell .knowledge-grid .guideline-row small,
-.app-shell .knowledge-grid .fact-row b,
-.app-shell .knowledge-grid .fact-row span,
-.app-shell .knowledge-grid .terminology-panel h2,
-.app-shell .knowledge-grid .terminology-panel > p,
-.app-shell .knowledge-grid .terminology-panel > div,
-.app-shell .knowledge-grid .knowledge-footer,
-.app-shell .knowledge-grid .knowledge-footer small {
-  position: relative;
-  line-height: 1.5;
-  transform: none;
-}
-.app-shell .knowledge-grid .guideline-row { align-items: flex-start; }
-.app-shell .knowledge-grid .guideline-row > span:nth-child(2) { display: block; }
-.app-shell .knowledge-grid .guideline-row b,
-.app-shell .knowledge-grid .guideline-row small { white-space: normal; }
 /* Final guardrails for the knowledge screen: no custom font metrics, clipped cards,
    fixed card heights, or positioned content may override normal document flow. */
 .app-shell .knowledge-grid,
@@ -91,7 +67,6 @@
 .app-shell .knowledge-grid .guideline-row,
 .app-shell .knowledge-grid .fact-row,
 .app-shell .knowledge-grid .knowledge-sync { position: static !important; inset: auto !important; height: auto !important; max-height: none !important; min-height: 0; overflow: visible !important; transform: none !important; }
-.app-shell .knowledge-grid { display: grid !important; grid-template-columns: repeat(12, minmax(0, 1fr)) !important; align-items: start !important; gap: 24px !important; padding-top: 24px; }
 .app-shell .knowledge-panel { grid-column: span 8; }
 .app-shell .knowledge-side { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; align-content: start !important; gap: 24px !important; }
 .app-shell .knowledge-grid > .knowledge-side { grid-column: span 4; }
