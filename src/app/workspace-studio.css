@@ -91,8 +91,13 @@
 .app-shell .knowledge-grid .guideline-row,
 .app-shell .knowledge-grid .fact-row,
 .app-shell .knowledge-grid .knowledge-sync { position: static !important; inset: auto !important; height: auto !important; max-height: none !important; min-height: 0; overflow: visible !important; transform: none !important; }
-.app-shell .knowledge-grid { display: grid !important; grid-template-columns: minmax(0, 1.35fr) minmax(300px, .85fr) !important; align-items: start !important; gap: 24px !important; }
+.app-shell .knowledge-grid { display: grid !important; grid-template-columns: repeat(12, minmax(0, 1fr)) !important; align-items: start !important; gap: 24px !important; padding-top: 24px; }
+.app-shell .knowledge-panel { grid-column: span 8; }
 .app-shell .knowledge-side { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; align-content: start !important; gap: 24px !important; }
+.app-shell .knowledge-grid > .knowledge-side { grid-column: span 4; }
+.app-shell .knowledge-grid .knowledge-header { display: flex !important; justify-content: space-between !important; align-items: flex-start !important; gap: 16px !important; }
+.app-shell .knowledge-grid .knowledge-header > div { flex: 1 1 auto; min-width: 0; }
+.app-shell .knowledge-grid .knowledge-header .secondary-btn { flex: 0 0 auto; max-width: 100%; white-space: nowrap; }
 .app-shell .knowledge-grid .panel-head { min-height: 0 !important; height: auto !important; overflow: visible !important; }
 .app-shell .knowledge-grid .guideline-row { display: flex !important; align-items: flex-start !important; gap: 14px !important; padding: 18px 20px !important; }
 .app-shell .knowledge-grid .guideline-row > span:nth-child(2) { flex: 1 1 auto !important; min-width: 0 !important; }
@@ -133,6 +138,6 @@
 .passport-page, .disclosure-page { font-family: var(--vb-font-body); }
 .passport-page .passport-hero h1, .disclosure-page h1 { font-family: var(--vb-font-display); font-weight: 400; }
 .passport-page .passport-hero h1 em { color: inherit; }
-@media (max-width: 1050px) { .app-shell .knowledge-grid { grid-template-columns: minmax(0, 1fr) !important; } .app-shell .knowledge-side { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+@media (max-width: 1050px) { .app-shell .knowledge-grid { grid-template-columns: minmax(0, 1fr) !important; } .app-shell .knowledge-panel, .app-shell .knowledge-grid > .knowledge-side { grid-column: 1; } .app-shell .knowledge-side { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
 @media (max-width: 760px) { .app-shell .page-heading h1 { font-size: 32px; } .app-shell .content { padding-top: 24px; } .app-shell .knowledge-side { grid-template-columns: minmax(0, 1fr); } .app-shell .knowledge-footer { grid-column: auto; } .app-shell .knowledge-panel .panel-head { flex-wrap: wrap; } .app-shell .knowledge-panel .panel-head .secondary-btn { margin-left: auto; } .app-shell .guideline-row { gap: 10px; padding: 14px; } .app-shell .fact-row { grid-template-columns: minmax(78px, .8fr) minmax(0, 1fr) 18px; gap: 7px; } }
 @media (prefers-reduced-motion: reduce) { .app-shell *, .passport-page *, .disclosure-page * { animation: none !important; transition: none !important; } }
