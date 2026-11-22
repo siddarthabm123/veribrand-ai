@@ -1,5 +1,5 @@
 export type WorkspaceRole = 'Content Creator' | 'Brand Reviewer' | 'Brand Admin';
-export interface ActiveSession { name: string; role: WorkspaceRole; workspace: string; entered: boolean }
+export interface ActiveSession { name: string; role: WorkspaceRole; workspace: string; entered: boolean; email?: string }
 
 const KEY = 'veribrand-ai:active-session:v1';
 const CHANGE_EVENT = 'veribrand-ai:session-change';
@@ -12,9 +12,15 @@ export function readSession(): ActiveSession | null {
     const raw = window.localStorage.getItem(KEY);
     if (raw === cachedRaw) return cachedSession;
     cachedRaw = raw;
-    cachedSession = raw ? JSON.parse(raw) as ActiveSession : null;
+    const value: unknown = raw ? JSON.parse(raw) : null;
+    if (!value || typeof value !== 'object') { cachedSession = null; return null; }
+    const session = value as Record<string, unknown>;
+    const roles = new Set<WorkspaceRole>(['Content Creator', 'Brand Reviewer', 'Brand Admin']);
+    cachedSession = typeof session.name === 'string' && session.name.trim() && typeof session.workspace === 'string' && roles.has(session.role as WorkspaceRole) && typeof session.entered === 'boolean'
+      ? { name: session.name.trim().slice(0, 48), role: session.role as WorkspaceRole, workspace: session.workspace.slice(0, 80), entered: session.entered, ...(typeof session.email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(session.email) ? { email: session.email.trim().slice(0, 120) } : {}) }
+      : null;
     return cachedSession;
-  } catch { return null; }
+  } catch { return cachedSession; }
 }
 export function saveSession(session: ActiveSession) {
   if (typeof window === 'undefined') return;

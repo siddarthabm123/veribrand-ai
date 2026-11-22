@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { BadgeCheck, BookOpen, CheckCircle2, ChevronRight, Plus, X } from 'lucide-react';
-import { CUSTOM_GUIDELINES_KEY } from '@/lib/custom-guidelines';
+import { CUSTOM_GUIDELINES_KEY, normalizeCustomRules } from '@/lib/custom-guidelines';
 
 type Guideline = { id: string; name: string; description: string; phrase?: string; replacement?: string; category?: string };
 const changeEvent = 'veribrand-ai:guidelines-change';
@@ -24,7 +24,8 @@ function subscribeGuidelines(listener: () => void) {
 function getGuidelinesSnapshot() {
   try {
     const saved = localStorage.getItem(CUSTOM_GUIDELINES_KEY);
-    return JSON.stringify(saved ? [...defaults, ...JSON.parse(saved)] : defaults);
+    const custom = saved ? normalizeCustomRules(JSON.parse(saved)).map((rule) => ({ id: rule.id, name: rule.name, phrase: rule.phrase, replacement: rule.replacement, category: rule.category, description: rule.explanation })) : [];
+    return JSON.stringify([...defaults, ...custom]);
   } catch { return JSON.stringify(defaults); }
 }
 
@@ -37,8 +38,26 @@ export default function KnowledgePage() {
   const [phrase, setPhrase] = useState('');
   const [replacement, setReplacement] = useState('');
   const [category, setCategory] = useState<'terminology' | 'fact_claim' | 'tone'>('terminology');
-  function addGuideline(event: React.FormEvent<HTMLFormElement>) {
+  const [formMessage, setFormMessage] = useState('');
+  const [saving, setSaving] = useState(false);
+  useEffect(() => {
+    let active = true;
+    void fetch('/api/knowledge', { cache: 'no-store' }).then(async (response) => {
+      if (!response.ok) return null;
+      return await response.json() as { customGuidelines?: Array<{ id: string; name: string; phrase: string; replacement: string; category: string; explanation: string }> };
+    }).then((remote) => {
+      if (!active || !remote?.customGuidelines?.length) return;
+      const local = normalizeCustomRules(JSON.parse(localStorage.getItem(CUSTOM_GUIDELINES_KEY) || '[]'));
+      const byPhrase = new Map([...remote.customGuidelines, ...local].map((rule) => [rule.phrase.toLowerCase(), rule]));
+      localStorage.setItem(CUSTOM_GUIDELINES_KEY, JSON.stringify(normalizeCustomRules([...byPhrase.values()])));
+      window.dispatchEvent(new Event(changeEvent));
+    }).catch(() => undefined);
+    return () => { active = false; };
+  }, []);
+  async function addGuideline(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (saving) return;
+    setSaving(true); setFormMessage('');
     const next = {
       id: 'BG-C-' + crypto.randomUUID().slice(0, 8).toUpperCase(),
       name: name.trim(),
@@ -47,20 +66,28 @@ export default function KnowledgePage() {
       replacement: replacement.trim(),
       category,
     };
-    if (!next.name || !next.description || !next.phrase || !next.replacement) return;
+    if (!next.name || !next.description || !next.phrase || !next.replacement) { setFormMessage('Fill in each field with non-blank text.'); setSaving(false); return; }
+    if (guidelines.some((item) => item.phrase?.toLowerCase() === next.phrase.toLowerCase())) { setFormMessage('That phrase already has a workspace rule.'); setSaving(false); return; }
     const custom = [...guidelines.filter((item) => !defaults.some((base) => base.id === item.id)), next];
-    try { localStorage.setItem(CUSTOM_GUIDELINES_KEY, JSON.stringify(custom)); } catch { /* Keep the new item for this session. */ }
+    try {
+      const response = await fetch('/api/knowledge', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...next, explanation: next.description }) });
+      if (!response.ok) throw new Error('The workspace could not save this rule.');
+      const result = await response.json() as { entry?: { id: string } };
+      if (result.entry) next.id = result.entry.id;
+      localStorage.setItem(CUSTOM_GUIDELINES_KEY, JSON.stringify(custom));
+    } catch { setFormMessage('Rule could not be saved. Check storage and your connection, then retry.'); setSaving(false); return; }
     window.dispatchEvent(new Event(changeEvent));
     setName('');
     setDescription('');
     setPhrase('');
     setReplacement('');
     setAdding(false);
+    setSaving(false);
   }
   return <div className="knowledge-grid">
     <div className="panel knowledge-panel">
       <div className="panel-head"><div><h2><BookOpen size={17}/> Brand guidelines</h2><p>{guidelines.length} standards · custom phrase rules are applied in New Audit.</p></div><button className="secondary-btn" onClick={() => setAdding((value) => !value)}>{adding ? <><X size={15}/> Cancel</> : <><Plus size={15}/> Add guideline</>}</button></div>
-      {adding && <form className="guideline-form" onSubmit={addGuideline}><label>Guideline name<input autoFocus required maxLength={72} value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Approved product name"/></label><label>Phrase to flag<input required maxLength={120} value={phrase} onChange={(event) => setPhrase(event.target.value)} placeholder="e.g. guaranteed results"/></label><label>Preferred replacement<input required maxLength={120} value={replacement} onChange={(event) => setReplacement(event.target.value)} placeholder="e.g. designed for reliable results"/></label><label>Rule category<select value={category} onChange={(event) => setCategory(event.target.value as typeof category)}><option value="terminology">Terminology</option><option value="fact_claim">Fact claim</option><option value="tone">Tone</option></select></label><label>Why this rule applies<textarea required maxLength={400} value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Explain the approved wording or evidence behind this rule"/></label><button className="primary-btn" type="submit">Save audit rule</button></form>}
+      {adding && <form className="guideline-form" onSubmit={addGuideline}><label>Guideline name<input autoFocus required maxLength={72} value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Approved product name"/></label><label>Phrase to flag<input required maxLength={120} value={phrase} onChange={(event) => setPhrase(event.target.value)} placeholder="e.g. guaranteed results"/></label><label>Preferred replacement<input required maxLength={120} value={replacement} onChange={(event) => setReplacement(event.target.value)} placeholder="e.g. designed for reliable results"/></label><label>Rule category<select value={category} onChange={(event) => setCategory(event.target.value as typeof category)}><option value="terminology">Terminology</option><option value="fact_claim">Fact claim</option><option value="tone">Tone</option></select></label><label>Why this rule applies<textarea required maxLength={400} value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Explain the approved wording or evidence behind this rule"/></label>{formMessage && <p role="alert" className="form-message">{formMessage}</p>}<button className="primary-btn" type="submit" disabled={saving}>{saving ? 'Saving rule…' : 'Save audit rule'}</button></form>}
       {guidelines.map((item) => <div className="guideline-row" key={item.id}><span className="rule-id">{item.id}</span><span><b>{item.name}</b><small>{item.phrase ? 'Flag “' + item.phrase + '” → use “' + item.replacement + '”. ' : ''}{item.description}</small></span><ChevronRight size={16}/></div>)}
     </div>
     <div className="knowledge-side">

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { WorkspaceAnalytics } from '@/types/governance';
 import { readSubmissions } from '@/lib/client-state';
+import GuidelineAutoDrafter from '@/components/GuidelineAutoDrafter';
 
 const empty: WorkspaceAnalytics = {
   days: 30,
@@ -65,5 +66,6 @@ export default function AnalyticsDashboard() {
         {data.topRules.length ? data.topRules.map((rule) => <div key={rule.citation}><span className="rule-id">{rule.citation}</span><span><b>{rule.citation.startsWith('BG-C') ? 'Custom workspace rule' : 'Brand guideline'}</b><i><em style={{ width: String(Math.round(rule.count / Math.max(1, data.topRules[0].count) * 100)) + '%' }}/></i></span><strong>{rule.count}</strong></div>) : <p className="analytics-message">No cited findings in this period.</p>}
       </div>
     </div>
+    <GuidelineAutoDrafter />
   </>;
 }

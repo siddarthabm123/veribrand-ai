@@ -1,102 +1,98 @@
 # VeriBrand AI — Team ArticXCoders
 
-## Studio redesign
+An explainable brand governance workspace that checks campaign copy and assets before publication. It cites the rule behind each finding, offers focused fixes, and keeps a human reviewer in control. A seeded Acme Cloud demo works without a login or API key; add Supabase for durable shared records.
 
-The landing page has an animated CSS 3D identity, responsive editorial typography, locally hosted fonts, quick workspace links, and a real audit screenshot. The workspace uses a coordinated dark green sidebar and paper surfaces. The monogram rotates continuously; explicit pause, off-screen suspension, and reduced-motion support remain available.
+## Demo Account Credentials
 
-Run `npm ci`, then `npm run dev`. Open `/welcome` for the introduction and choose **Explore workspace** to enter the demo. Assets use the existing product, with Geist and Hedvig Letters Serif licenses in `public/fonts`.
+| Email | Password | Role permissions |
+| --- | --- | --- |
+| `reviewer@acmecloud.demo` | `VeriBrand@2026` | Review findings, comment, approve, and export compliance records. |
+| `creator@acmecloud.demo` | `VeriBrand@2026` | Submit campaign drafts and inspect suggested fixes. |
+| `admin@acmecloud.demo` | `VeriBrand@2026` | Manage brand facts, guidelines, and rules. |
 
-Validation: TypeScript and lint passed for the changed components; browser checks covered 320–1920px layouts, animation controls, role entry, session persistence, Brand Passport fixes and review saving, main routes, and rendering without JavaScript. Production build verification remains pending: this Windows environment stalled in Turbopack, while Webpack compiled and passed TypeScript but hit an EPERM filesystem error during prerendering. Require a successful hosted preview build before merging.
+Demo sign-in is a friction-free prototype persona selector, not real authentication or authorization. The UI also permits a custom `*.demo` email. Do not use real credentials.
 
-### Deploying these changes on Vercel
+## Run locally
 
-1. Review the pull request and its preview deployment. Test `/welcome`, workspace entry, and the Brand Passport review flow. Merge only after the build passes.
-2. If this repository is already connected to Vercel and `main` is its production branch, merging to `main` normally starts a production deployment automatically. Confirm it reaches **Ready** in Vercel.
-3. For a first deployment, the repository owner imports this GitHub repository in Vercel, selects **Next.js**, keeps the repository root as the root directory, and uses the normal Next.js build/output defaults. No environment variables are required for the seeded demo; preserve any optional credentials already configured on the existing project.
-4. Check the resulting production URL. Do not change the current project’s domain or access settings to publish this visual update.
+```bash
+git clone <repository-url>
+cd veribrand-ai
+npm install
+npm run dev
+```
 
-Deployment behavior: https://vercel.com/docs/git/vercel-for-github
+Open [http://localhost:3000](http://localhost:3000). No environment variables are mandatory for the seeded demo. Production compilation: `npm run build`.
 
-An explainable brand-governance workspace for checking copy and campaign assets before publication. The Acme Cloud demo workspace is pre-seeded so judges can try it without an account, API key, or database setup.
+## 30-second judge walkthrough
 
-## Project overview
+1. Open `/impact` and choose the sample Brand Passport flow.
+2. Inspect cited findings and edit the campaign text or banner.
+3. Send it to review, accept a focused change or record an override, then approve.
+4. Export the PDF compliance certificate and test the webhook gate before and after approval.
+5. Open `/analytics` for the Gap Radar and rule auto-drafter; publish an approved proposal and test the new rule from `/audit/new`.
 
-Growing organisations publish through employees, agencies, and AI tools. Incorrect claims, stale facts, inconsistent terminology, off-brand visuals, and inaccessible colors can erode trust. VeriBrand compares drafts with approved rules, explains findings, suggests focused corrections, and leaves publication decisions with a human reviewer.
+## Features
 
-### 30-second judge walkthrough
+- Tier 1 deterministic audit for verified claims, custom banned phrases, and supported accessibility checks.
+- Multi-format brief and banner inspection for TXT, Markdown, DOCX, PDF (best-effort text extraction), PNG, JPG, and WebP. Browser image analysis reports sampled colors, palette distance, contrast, and layout checks.
+- Source-cited findings, focused fixes, reviewer comments, overrides, approval history, and role-oriented demo sessions.
+- Brand Passport, Gate Simulator API, PDF certificate, Gap Radar analytics, and reviewer-informed guideline proposals.
+- PII redaction before the optional AI review request; no API key is required for deterministic checks.
 
-1. Open `/impact` (or select **Brand Passport** from the floating launcher).
-2. Edit the risky sample copy or keep it. Inspect each finding’s exact rule citation and source.
-3. Apply a focused fix. The message stays intact while the flagged phrase changes.
-4. Select **Send to human review** and open the saved record.
-5. Accept a fix or override it with a reason, add a comment, and approve only after pending findings are resolved.
-6. Export the JSON Brand Passport with findings, sources, and checks run/not run.
+## Round 3 improvements delivered
 
-Other routes include `/audit/new`, `/review/launch-blog`, `/knowledge`, `/analytics`, and `/disclosures`. The demo does not require a login or API key.
+1. **Document and banner inspector:** uploads common brief formats and image assets, extracts text where supported, computes color and contrast checks in the browser, and presents an inspection report.
+2. **Guideline Gap Auto-Drafter:** derives reviewable proposals from recurring findings and overrides. A human approves a proposal before it becomes an active Brand Knowledge rule.
+3. **Live pre-publish gate and PDF certificate:** `POST /api/webhook/gate` returns `403 BLOCKED` while findings remain unresolved, and `200 APPROVED` with a verification signature after sign-off. The review and Brand Passport flows can generate a downloadable PDF certificate.
 
-## Problem, users, and workflow
+## Architecture and technical decisions
 
-The product serves content creators, brand reviewers/managers, and brand administrators in organisations publishing across teams and channels. Its goal is to prevent avoidable brand risk without turning governance into an opaque rejection gate.
-
-**Workflow:** maintain guidelines and verified facts → submit copy or a visual asset → run deterministic checks and optional AI review → inspect source-cited findings → apply or override suggestions → collaborate in comments → record human sign-off and revision history → use repeated findings to improve guidance.
-
-The demo includes text review and a visual contrast preview, plus sample facts, terminology, and palette. Image/document ingestion and full color-distance analysis are future work unless completed and verified separately.
-
-## System architecture and technical decisions
-
-- **Next.js App Router and TypeScript:** route-based UI and API handlers in one deployable application.
-- **Tier 1 deterministic checks:** exact terminology scans, approved numeric-claim checks, and WCAG contrast calculation provide repeatable results for supported rules.
-- **Tier 2 AI verification:** the engine redacts emails, phone numbers, and common API-token patterns before its optional OpenAI request. AI is disabled when `OPENAI_API_KEY` is absent. The current engine does not yet convert the AI response into structured findings; displayed findings come from deterministic checks.
-- **Hybrid repository:** an in-memory demo store is used without Supabase credentials. When configured, the repository attempts Supabase writes. Browser `localStorage` keeps Brand Passport drafts, submissions, review changes, and exported passport records available on that browser across navigation and serverless cold starts. Browser storage is device-local, not cross-device collaboration.
-- **Database model:** `supabase/schema.sql` documents PostgreSQL/pgvector tables for guidelines, facts, rules, submissions, findings, comments, and revision history.
-- **UI stack:** React, Tailwind CSS v4, and Lucide icons.
+- **Next.js App Router, React, TypeScript:** UI pages and server API routes are deployed as one application.
+- **Tier 1 rules:** deterministic checks make supported phrase, fact, and contrast decisions repeatable and cite their rule source.
+- **Tier 2 AI:** when `OPENAI_API_KEY` is configured, the audit engine sends a PII-redacted review request. Deterministic findings remain available without it. AI output is not currently converted into structured findings, so the product does not rely on the AI request for enforcement.
+- **Hybrid persistence:** with server-side Supabase credentials, repository reads/writes cover submissions, findings, comments, revision history, and custom guideline rules. Without Supabase, an in-memory seeded server fallback and browser `localStorage` keep the demo usable. Browser storage is device-local and does not synchronize between users.
+- **Supabase security:** service/secret keys are server-only. Row Level Security is enabled by `supabase/enable_rls.sql`; apply it in the Supabase SQL Editor for an existing project. This prototype uses a server admin client and does not provide authenticated per-user database authorization, so expose it only to a trusted demo audience until real authentication and policies are implemented.
+- **Vercel:** compatible with the Next.js preset. A deployment is live only after its URL has been checked.
 
 ### Optional environment variables
 
-Copy `.env.example` to `.env.local` only when configuring optional services. Never commit `.env.local` or production secrets.
+Copy `.env.example` to `.env.local`. Never commit secrets. The server supports these names and legacy aliases:
 
-| Variable | Purpose | Required for demo? |
+| Variable | Purpose | Required? |
 | --- | --- | --- |
-| `OPENAI_API_KEY` | Optional tone/claim review request after PII redaction | No |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | No |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server-only Supabase access | No |
+| `SUPABASE_URL` or `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | No |
+| `SUPABASE_SECRET_KEY` or `SUPABASE_SERVICE_ROLE_KEY` | Server-only database access | No |
+| `OPENAI_API_KEY` | Optional PII-redacted AI review request | No |
 
-## Local development and Vercel
+Apply `supabase/schema.sql` for a new database, or `supabase/enable_rls.sql` to enable RLS on an existing database. Never expose a secret/service key in a `NEXT_PUBLIC_` variable.
 
-Requirements: Node.js supported by the installed Next.js version and npm.
+## Verification scenarios
 
-    npm install
-    npm run dev
-    npm run build
-    npm run start
-
-Open `http://localhost:3000`. For Vercel, import the repository and use the Next.js preset. The seeded demo works without environment variables. Add optional secrets only in Vercel project settings. A clean local build does not replace checking the deployed URL and API routes.
+- Run `npm run lint` and `npm run build`.
+- Open `/`, `/welcome`, `/audit/new`, `/knowledge`, `/analytics`, `/impact`, and `/disclosures` directly and refresh each route.
+- Add a banned phrase in Brand Knowledge, run a new audit containing it, and verify the new rule citation appears.
+- Upload the included sample brief and promo banner, then inspect the reported checks.
+- Test the gate on an unapproved submission (blocked), approve it, and test again (approved). Download and inspect the generated PDF.
+- With Supabase configured, add a rule and submission, refresh, and confirm they persist. Without Supabase, check the seeded local demo path.
 
 ## AI, tools, libraries, and reused material disclosure
 
-- **OpenAI Codex CLI:** used as AI-assisted development support for code generation, editing, and debugging in this workspace. Team members must review the implementation and accurately describe their personal contributions.
-- **OpenAI API:** optional runtime review request. PII redaction runs before the request; the demo works without an API key.
-- **Next.js 16, React, TypeScript, Tailwind CSS v4, Lucide React:** framework, UI, styling, and icons.
-- **Supabase JS, PostgreSQL, and pgvector:** optional persistence client and documented schema.
-- **Vercel:** intended deployment platform; do not claim a live deployment until it has been deployed and checked.
-- **Starter material:** the repository began from a Next.js starter. Disclose that starter and any other reused material in the event submission, and verify third-party licenses.
-
-The supplied event rules permit AI and existing libraries but require disclosure of significant tools and reused code. Do not claim interviews, user testing, production integrations, deployment, or individual work without evidence.
-
-## Three planned Round 3 improvements
-
-1. **Guideline learning loop:** turn reviewer overrides into admin-reviewed proposals to clarify or update rules; never silently change policy.
-2. **Multilingual governance:** add locale-aware terminology and guidance, with reviewers verifying translated claims and their sources.
-3. **Design-system connectors:** import approved Figma tokens/assets and detect palette or component drift against the active brand system.
+- **OpenAI Codex CLI:** AI-assisted development, code editing, and debugging. Team members should describe their own reviewed contributions accurately.
+- **OpenAI API:** optional runtime review request; sensitive data is redacted before the request.
+- **Next.js, React, TypeScript, Tailwind CSS, Lucide React, Mammoth, pdf-lib, Supabase JS:** application framework, UI, document extraction, PDF generation, and database client.
+- **Vercel:** hosting and deployment platform.
+- **Design assets and fonts:** see `public/fonts` and repository asset sources/licenses; disclose starter material and any other reused work in the event submission.
 
 ## Team ArticXCoders contributions
 
-| Team member (full name) | Role | Individual contribution / evidence |
-| --- | --- | --- |
-| Siddartha B M | AI Audit Engine, Custom Rules & Retrieval Architecture | Deterministic and custom-rule audit flow, evidence citations, and retrieval architecture. |Workspace analytics, session persistence, and end-to-end quality checks. |
-|G Raghav kumar] | Next.js Diff Workspace, Brand Passport & Visual WCAG Inspector | Review workspace and diffs, Brand Passport workflow, and visual contrast inspection. |Gap Radar Analytics, Session State & End-to-End QA |
- 
+| Team member | Role and contribution |
+| --- | --- |
+| Siddartha B M | AI Audit Engine, Custom Rules & Retrieval Architecture |
+| [Teammate 2 Name] | Next.js Diff Workspace, Brand Passport & Visual WCAG Inspector |
+| [Teammate 3 Name] | Gap Radar Analytics, Session State & End-to-End QA |
 
-## Limitations and responsible use
+Replace teammate placeholders with verified full names before final submission.
 
-This is a hackathon prototype, not a production compliance guarantee. In-memory server data can reset between serverless invocations; browser-local records are available only in the same browser profile. Supabase reads and writes are partial and should be fully connected and tested before multi-user production use. Optional AI responses are not currently structured into audit findings. Validate privacy, accessibility, role permissions, API failure states, and deployed behavior with realistic user feedback before relying on this for publication decisions.
+## Responsible use and limitations
+
+This is a hackathon prototype, not a production compliance guarantee. Demo role selection is not an authentication system. The optional AI response currently does not create structured findings. Browser-local state is limited to one browser profile, while Supabase-backed records are shared by this server-admin prototype. Validate policies, access control, privacy, accessibility, and deployed behavior before making publication decisions from it.

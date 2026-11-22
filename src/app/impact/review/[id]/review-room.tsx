@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, BadgeCheck, BookOpen, Check, Clock3, MessageSquare, ShieldCheck } from 'lucide-react';
 import type { AuditFinding, Submission } from '@/types/governance';
 import { readSubmission, saveSubmission } from '@/lib/client-state';
+import GateSimulator from '@/components/GateSimulator';
 
 export default function ReviewRoom({ id }: { id: string }) {
   const [record, setRecord] = useState<Submission | null>(null);
@@ -12,17 +13,18 @@ export default function ReviewRoom({ id }: { id: string }) {
   const [comment, setComment] = useState('');
   const [message, setMessage] = useState('Loading saved audit…');
   const [busy, setBusy] = useState(false);
+  const saveLock = useRef(false);
 
-  useEffect(() => { const local = readSubmission(id); fetch(`/api/submissions/${encodeURIComponent(id)}`).then(async (response) => { if (!response.ok) throw new Error('Review record unavailable from the server.'); return response.json(); }).then((value: Submission) => { setRecord(local ?? value); setMessage(local ? 'Loaded this browser’s saved review record.' : ''); }).catch(() => { if (local) { setRecord(local); setMessage('Using this browser’s saved review record.'); } else setMessage('This review record was not found in this browser. Submit the draft again from Brand Passport.'); }); }, [id]);
+  useEffect(() => { const local = readSubmission(id); fetch(`/api/submissions/${encodeURIComponent(id)}`, { cache: 'no-store' }).then(async (response) => { if (!response.ok) throw new Error('Review record unavailable from the server.'); return response.json(); }).then((value: Submission) => { saveSubmission(value); setRecord(value); setMessage('Loaded the latest saved review record.'); }).catch(() => { if (local) { setRecord(local); setMessage('Using this browser’s saved review record.'); } else setMessage('This review record was not found in this browser. Submit the draft again from Brand Passport.'); }); }, [id]);
 
   const save = async (patch: Partial<Submission>) => {
-    if (!record) return;
-    setBusy(true);
+    if (!record || saveLock.current) return;
+    saveLock.current = true; setBusy(true);
     const updatedLocal: Submission = { ...record, ...patch, history: [...record.history, `${role} updated the review · ${new Date().toLocaleString()}`] };
     saveSubmission(updatedLocal); setRecord(updatedLocal);
     try { const response = await fetch(`/api/submissions/${encodeURIComponent(id)}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch) }); if (!response.ok) throw new Error('Could not sync this review.'); const updated = await response.json() as Submission; saveSubmission(updated); setRecord(updated); setMessage('Decision saved to this browser and review service.'); }
     catch { setMessage('Saved to this browser. It will remain available here if the review service is temporarily unavailable.'); }
-    finally { setBusy(false); }
+    finally { saveLock.current = false; setBusy(false); }
   };
 
   const decideFinding = (finding: AuditFinding, decision: 'accepted' | 'overridden') => {
@@ -45,6 +47,7 @@ export default function ReviewRoom({ id }: { id: string }) {
       <section className="room-card"><h2>Evidence ledger <span>{record.findings.length}</span></h2>{record.findings.length ? record.findings.map((finding) => <article className="room-finding" key={finding.id}><div className="room-rule"><b>{finding.rule_citation}</b><span>{finding.category.replace('_', ' ')} · {finding.severity}</span><em>{finding.reviewer_status}</em></div><div className="evidence-phrase"><del>{finding.exact_span}</del><span>→</span><ins>{finding.suggested_fix}</ins></div><p>{finding.explanation}</p><blockquote>{finding.source_excerpt}<small><BookOpen size={11}/> Approved source · {finding.rule_citation}</small></blockquote>{finding.override_reason && <p className="override-note">Override reason: {finding.override_reason}</p>}{finding.reviewer_status === 'pending' && <div className="room-actions"><button disabled={busy} onClick={() => decideFinding(finding, 'accepted')}><Check size={13}/> Accept fix</button><button disabled={busy} onClick={() => decideFinding(finding, 'overridden')}>Override with reason</button></div>}</article>) : <div className="all-clear"><BadgeCheck size={22}/><b>No open findings</b><p>This content passed the available deterministic checks.</p></div>}</section>
       <section className="room-card room-comments"><h2><MessageSquare size={15}/> Reviewer comments</h2>{record.comments.map((entry, index) => <p key={`${entry}-${index}`}>{entry}</p>)}<div className="room-comment-entry"><input value={comment} onChange={(event) => setComment(event.target.value)} placeholder="Leave a comment for the team"/><button onClick={addComment} disabled={busy || !comment.trim()}>Add comment</button></div></section>
       <section className="room-card room-signoff"><div><h2>Human sign-off</h2><p>Final publication decisions remain with an authorised reviewer.</p></div><button onClick={() => signOff('changes_requested')} disabled={busy}>Request changes</button><button onClick={() => signOff('approved')} disabled={busy}><Check size={13}/> Approve for publish</button></section></div></>}
+    {record && <GateSimulator submission={record}/>}
     <footer className="passport-footer"><span>DEMO WORKSPACE <i/> Acme Cloud</span><Link href="/">Workspace overview</Link></footer>
   </main>;
 }
