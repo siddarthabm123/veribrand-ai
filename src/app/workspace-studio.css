@@ -27,7 +27,7 @@
 .app-shell .sidebar-note .note-icon { color: var(--vb-orange); }
 .app-shell .profile-session-wrap { border-color: var(--vb-dark-rule); }
 .app-shell .profile-session { color: var(--vb-paper); }
-.app-shell .topbar { background: var(--vb-paper); border-bottom-color: var(--vb-rule); min-height: 76px; }
+.app-shell .topbar { position: sticky; top: 0; z-index: 30; height: auto; min-height: 76px; background: #f8fafc; border-bottom-color: var(--vb-rule); }
 .app-shell .content { padding-top: 40px; }
 .app-shell .knowledge-grid { grid-template-columns: minmax(0, 1.35fr) minmax(320px, .85fr); gap: 18px; align-items: start; }
 .app-shell .knowledge-panel, .app-shell .knowledge-side, .app-shell .fact-panel, .app-shell .terminology-panel { min-width: 0; }
