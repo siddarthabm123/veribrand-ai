@@ -25,6 +25,55 @@
 .app-shell .profile-session { color: var(--vb-paper); }
 .app-shell .topbar { background: var(--vb-paper); border-bottom-color: var(--vb-rule); min-height: 76px; }
 .app-shell .content { padding-top: 40px; }
+.app-shell .knowledge-grid { grid-template-columns: minmax(0, 1.35fr) minmax(320px, .85fr); gap: 18px; align-items: start; }
+.app-shell .knowledge-panel, .app-shell .knowledge-side, .app-shell .fact-panel, .app-shell .terminology-panel { min-width: 0; }
+.app-shell .knowledge-panel .panel-head { align-items: flex-start; gap: 16px; }
+.app-shell .knowledge-panel .panel-head > div { min-width: 0; }
+.app-shell .knowledge-panel .panel-head h2, .app-shell .fact-panel .panel-head h2 { line-height: 1.35; }
+.app-shell .knowledge-panel .panel-head p, .app-shell .fact-panel .panel-head p { line-height: 1.5; }
+.app-shell .knowledge-panel .panel-head .secondary-btn { flex: 0 0 auto; }
+.app-shell .guideline-row { min-height: 76px; align-items: flex-start; gap: 14px; padding: 16px 20px; }
+.app-shell .guideline-row > span:nth-child(2) { min-width: 0; overflow-wrap: anywhere; }
+.app-shell .guideline-row b { display: block; font-size: 15px; line-height: 1.35; font-weight: 500; }
+.app-shell .guideline-row small { display: block; margin-top: 5px; color: var(--vb-muted); font-size: 13px !important; line-height: 1.55; overflow-wrap: anywhere; }
+.app-shell .guideline-row > svg { flex: 0 0 auto; margin-top: 3px; }
+.app-shell .rule-id { flex: 0 0 auto; line-height: 1.3; }
+.app-shell .fact-panel .panel-head { gap: 12px; }
+.app-shell .fact-panel .panel-head > div { min-width: 0; }
+.app-shell .fact-row { display: grid; grid-template-columns: minmax(86px, .85fr) minmax(0, 1fr) 18px; gap: 10px; min-height: 48px; line-height: 1.45; }
+.app-shell .fact-row b { min-width: 0; font-size: 13px; line-height: 1.4; overflow-wrap: anywhere; }
+.app-shell .fact-row span { min-width: 0; font-size: 13px; line-height: 1.4; }
+.app-shell .fact-row svg { justify-self: end; }
+.app-shell .terminology-panel { padding: 18px; }
+.app-shell .terminology-panel h2 { font-size: 16px; line-height: 1.35; }
+.app-shell .terminology-panel > p { font-size: 11px; line-height: 1.4; letter-spacing: .08em; }
+.app-shell .terminology-panel > div { flex-wrap: wrap; gap: 8px; min-height: 44px; font-size: 13px; line-height: 1.45; overflow-wrap: anywhere; }
+.app-shell .knowledge-footer { font-size: 13px; line-height: 1.5; }
+.app-shell .knowledge-footer small { display: flex; align-items: center; gap: 6px; margin: 6px 0 0; font-size: 12px; line-height: 1.45; }
+/* Keep the knowledge view on a single, predictable text baseline. The shared
+   readability scale raises small text sizes; without explicit line heights,
+   older cached/combined styles can make the rows paint on top of each other. */
+.app-shell .knowledge-grid,
+.app-shell .knowledge-grid * { text-shadow: none; }
+.app-shell .knowledge-grid .panel-head h2,
+.app-shell .knowledge-grid .panel-head p,
+.app-shell .knowledge-grid .guideline-row b,
+.app-shell .knowledge-grid .guideline-row small,
+.app-shell .knowledge-grid .fact-row b,
+.app-shell .knowledge-grid .fact-row span,
+.app-shell .knowledge-grid .terminology-panel h2,
+.app-shell .knowledge-grid .terminology-panel > p,
+.app-shell .knowledge-grid .terminology-panel > div,
+.app-shell .knowledge-grid .knowledge-footer,
+.app-shell .knowledge-grid .knowledge-footer small {
+  position: relative;
+  line-height: 1.5;
+  transform: none;
+}
+.app-shell .knowledge-grid .guideline-row { align-items: center; }
+.app-shell .knowledge-grid .guideline-row > span:nth-child(2) { display: block; }
+.app-shell .knowledge-grid .guideline-row b,
+.app-shell .knowledge-grid .guideline-row small { white-space: normal; }
 .app-shell .page-heading { margin-bottom: 28px; }
 .app-shell .page-heading h1 { font-family: var(--vb-font-display); font-size: 40px; font-weight: 400; letter-spacing: -1.5px; line-height: 1.12; margin-bottom: 12px; }
 .app-shell .page-heading p { color: var(--vb-muted); }
@@ -57,5 +106,6 @@
 .passport-page, .disclosure-page { font-family: var(--vb-font-body); }
 .passport-page .passport-hero h1, .disclosure-page h1 { font-family: var(--vb-font-display); font-weight: 400; }
 .passport-page .passport-hero h1 em { color: inherit; }
-@media (max-width: 760px) { .app-shell .page-heading h1 { font-size: 32px; } .app-shell .content { padding-top: 24px; } }
+@media (max-width: 1050px) { .app-shell .knowledge-grid { grid-template-columns: minmax(0, 1fr); } .app-shell .knowledge-side { grid-template-columns: repeat(2, minmax(0, 1fr)); } .app-shell .knowledge-footer { grid-column: 1 / -1; } }
+@media (max-width: 760px) { .app-shell .page-heading h1 { font-size: 32px; } .app-shell .content { padding-top: 24px; } .app-shell .knowledge-side { grid-template-columns: minmax(0, 1fr); } .app-shell .knowledge-footer { grid-column: auto; } .app-shell .knowledge-panel .panel-head { flex-wrap: wrap; } .app-shell .knowledge-panel .panel-head .secondary-btn { margin-left: auto; } .app-shell .guideline-row { gap: 10px; padding: 14px; } .app-shell .fact-row { grid-template-columns: minmax(78px, .8fr) minmax(0, 1fr) 18px; gap: 7px; } }
 @media (prefers-reduced-motion: reduce) { .app-shell *, .passport-page *, .disclosure-page * { animation: none !important; transition: none !important; } }
