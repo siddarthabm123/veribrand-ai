@@ -74,10 +74,33 @@
   line-height: 1.5;
   transform: none;
 }
-.app-shell .knowledge-grid .guideline-row { align-items: center; }
+.app-shell .knowledge-grid .guideline-row { align-items: flex-start; }
 .app-shell .knowledge-grid .guideline-row > span:nth-child(2) { display: block; }
 .app-shell .knowledge-grid .guideline-row b,
 .app-shell .knowledge-grid .guideline-row small { white-space: normal; }
+/* Final guardrails for the knowledge screen: no custom font metrics, clipped cards,
+   fixed card heights, or positioned content may override normal document flow. */
+.app-shell .knowledge-grid,
+.app-shell .knowledge-grid * { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important; letter-spacing: normal !important; word-spacing: normal !important; font-kerning: auto !important; line-height: 1.5 !important; }
+.app-shell .knowledge-grid,
+.app-shell .knowledge-grid .knowledge-panel,
+.app-shell .knowledge-grid .knowledge-side,
+.app-shell .knowledge-grid .fact-panel,
+.app-shell .knowledge-grid .terminology-panel,
+.app-shell .knowledge-grid .knowledge-header,
+.app-shell .knowledge-grid .guideline-row,
+.app-shell .knowledge-grid .fact-row,
+.app-shell .knowledge-grid .knowledge-sync { position: static !important; inset: auto !important; height: auto !important; max-height: none !important; min-height: 0; overflow: visible !important; transform: none !important; }
+.app-shell .knowledge-grid { display: grid !important; grid-template-columns: minmax(0, 1.35fr) minmax(300px, .85fr) !important; align-items: start !important; gap: 24px !important; }
+.app-shell .knowledge-side { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; align-content: start !important; gap: 24px !important; }
+.app-shell .knowledge-grid .panel-head { min-height: 0 !important; height: auto !important; overflow: visible !important; }
+.app-shell .knowledge-grid .guideline-row { display: flex !important; align-items: flex-start !important; gap: 14px !important; padding: 18px 20px !important; }
+.app-shell .knowledge-grid .guideline-row > span:nth-child(2) { flex: 1 1 auto !important; min-width: 0 !important; }
+.app-shell .knowledge-grid .guideline-row b,
+.app-shell .knowledge-grid .guideline-row small { display: block !important; overflow-wrap: anywhere !important; }
+.app-shell .knowledge-sync { display: flex !important; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px; color: var(--vb-muted); font-size: 13px; }
+.app-shell .knowledge-sync small { display: inline-flex !important; align-items: center; gap: 5px; margin: 0 !important; }
+.app-shell .knowledge-footer { display: none !important; }
 .app-shell .page-heading { margin-bottom: 28px; }
 .app-shell .page-heading h1 { font-family: var(--vb-font-display); font-size: 40px; font-weight: 400; letter-spacing: -1.5px; line-height: 1.12; margin-bottom: 12px; }
 .app-shell .page-heading p { color: var(--vb-muted); }
@@ -110,6 +133,6 @@
 .passport-page, .disclosure-page { font-family: var(--vb-font-body); }
 .passport-page .passport-hero h1, .disclosure-page h1 { font-family: var(--vb-font-display); font-weight: 400; }
 .passport-page .passport-hero h1 em { color: inherit; }
-@media (max-width: 1050px) { .app-shell .knowledge-grid { grid-template-columns: minmax(0, 1fr); } .app-shell .knowledge-side { grid-template-columns: repeat(2, minmax(0, 1fr)); } .app-shell .knowledge-footer { grid-column: 1 / -1; } }
+@media (max-width: 1050px) { .app-shell .knowledge-grid { grid-template-columns: minmax(0, 1fr) !important; } .app-shell .knowledge-side { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
 @media (max-width: 760px) { .app-shell .page-heading h1 { font-size: 32px; } .app-shell .content { padding-top: 24px; } .app-shell .knowledge-side { grid-template-columns: minmax(0, 1fr); } .app-shell .knowledge-footer { grid-column: auto; } .app-shell .knowledge-panel .panel-head { flex-wrap: wrap; } .app-shell .knowledge-panel .panel-head .secondary-btn { margin-left: auto; } .app-shell .guideline-row { gap: 10px; padding: 14px; } .app-shell .fact-row { grid-template-columns: minmax(78px, .8fr) minmax(0, 1fr) 18px; gap: 7px; } }
 @media (prefers-reduced-motion: reduce) { .app-shell *, .passport-page *, .disclosure-page * { animation: none !important; transition: none !important; } }

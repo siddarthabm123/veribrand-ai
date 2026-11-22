@@ -84,16 +84,15 @@ export default function KnowledgePage() {
     setAdding(false);
     setSaving(false);
   }
-  return <div className="knowledge-grid">
+  return <section className="knowledge-grid" aria-label="Brand knowledge and verified facts">
     <div className="panel knowledge-panel">
-      <div className="panel-head"><div><h2><BookOpen size={17}/> Brand guidelines</h2><p>{guidelines.length} standards · custom phrase rules are applied in New Audit.</p></div><button className="secondary-btn" onClick={() => setAdding((value) => !value)}>{adding ? <><X size={15}/> Cancel</> : <><Plus size={15}/> Add guideline</>}</button></div>
+      <div className="panel-head knowledge-header"><div><h2><BookOpen size={17}/> Brand guidelines</h2><p>{guidelines.length} standards · custom phrase rules are applied in New Audit.</p><div className="knowledge-sync"><span className="pulse"/>Synced with Acme Cloud workspace <small><BadgeCheck size={12}/> Changes saved on this device</small></div></div><button className="secondary-btn" onClick={() => setAdding((value) => !value)}>{adding ? <><X size={15}/> Cancel</> : <><Plus size={15}/> Add guideline</>}</button></div>
       {adding && <form className="guideline-form" onSubmit={addGuideline}><label>Guideline name<input autoFocus required maxLength={72} value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Approved product name"/></label><label>Phrase to flag<input required maxLength={120} value={phrase} onChange={(event) => setPhrase(event.target.value)} placeholder="e.g. guaranteed results"/></label><label>Preferred replacement<input required maxLength={120} value={replacement} onChange={(event) => setReplacement(event.target.value)} placeholder="e.g. designed for reliable results"/></label><label>Rule category<select value={category} onChange={(event) => setCategory(event.target.value as typeof category)}><option value="terminology">Terminology</option><option value="fact_claim">Fact claim</option><option value="tone">Tone</option></select></label><label>Why this rule applies<textarea required maxLength={400} value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Explain the approved wording or evidence behind this rule"/></label>{formMessage && <p role="alert" className="form-message">{formMessage}</p>}<button className="primary-btn" type="submit" disabled={saving}>{saving ? 'Saving rule…' : 'Save audit rule'}</button></form>}
       {guidelines.map((item) => <div className="guideline-row" key={item.id}><span className="rule-id">{item.id}</span><span><b>{item.name}</b><small>{item.phrase ? 'Flag “' + item.phrase + '” → use “' + item.replacement + '”. ' : ''}{item.description}</small></span><ChevronRight size={16}/></div>)}
     </div>
     <div className="knowledge-side">
       <div className="panel fact-panel"><div className="panel-head"><div><h2>Approved facts</h2><p>Verified claims only</p></div><CheckCircle2 size={17}/></div>{facts.map(([fact, label]) => <div className="fact-row" key={fact}><b>{fact}</b><span>{label}</span><CheckCircle2 size={14}/></div>)}</div>
       <div className="panel terminology-panel"><h2>Terminology guardrails</h2><p>BANNED → PREFERRED</p>{terminology.map(([bad, good]) => <div key={bad}><del>{bad}</del><span>→</span><b>{good}</b></div>)}</div>
-      <div className="knowledge-footer"><span className="pulse"/> Synced with Acme Cloud workspace <small><BadgeCheck size={12}/> Local changes saved on this device</small></div>
     </div>
-  </div>;
+  </section>;
 }
