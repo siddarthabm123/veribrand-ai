@@ -6,6 +6,8 @@ const loadModule = createRequire(import.meta.url);
 loadModule.extensions['.ts'] = (module, filename) => module._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText, filename);
 const { applyReview, contrast, fingerprint, initializeGovernance, normalizeVisual, readiness, scanGovernance } = loadModule('../src/lib/governance.ts');
 const { evidencePack } = loadModule('../src/lib/evidence.ts');
+const { workspaceActor, canMutate } = loadModule('../src/lib/access.ts');
+const { publicationChecks, textDifference } = loadModule('../src/lib/publishing.ts');
 
 async function main() {
   const pack = { version: 'pack-one', facts: [{ fact_key: 'uptime', claim_statement: 'Uptime SLA', exact_value: '99.95%', source_doc: 'SLA' }, { fact_key: 'support', claim_statement: 'Support response', exact_value: '15 minutes', source_doc: 'Support plan' }], guidelines: [], customGuidelines: [], rules: { banned_terms: { ACC: 'Acme Cloud', 'game-changing': 'powerful', '100% uptime': '99.95% uptime SLA' }, preferred_terms: {}, approved_hex_colors: ['#0F172A', '#F8FAFC'], min_wcag_ratio: 4.5 } };
@@ -52,6 +54,33 @@ async function main() {
   assert(version);
   const reordered = { ...knowledge, facts: [...knowledge.facts].reverse(), rules: { ...knowledge.rules, banned_terms: Object.fromEntries(Object.entries(knowledge.rules.banned_terms).reverse()) } };
   assert.equal((await evidencePack(knowledge)).version, (await evidencePack(reordered)).version, 'Database row order does not invalidate evidence packs');
+  const member = { id: 'reviewer-id', email: 'reviewer@example.com', app_metadata: { veribrand_workspace: 'team', veribrand_role: 'Brand Reviewer' }, user_metadata: { veribrand_role: 'Brand Admin' } };
+  assert.equal(workspaceActor(member, 'team').role, 'Brand Reviewer', 'User-editable metadata cannot elevate permissions');
+  assert.equal(workspaceActor(member, 'other-team'), null);
+  assert.equal(workspaceActor({ ...member, app_metadata: {} }, 'team'), null);
+  assert.equal(canMutate('/api/evidence', 'PUT', 'Brand Reviewer'), false);
+  assert.equal(canMutate('/api/webhook/gate', 'POST', 'Content Creator'), false);
+  assert.equal(canMutate('/api/knowledge', 'POST', 'Brand Admin'), true);
+  assert.equal((await publicationChecks(record, pack.version, record.governance.channel, true)).find(item => item.id === 'identity').pass, false, 'Legacy demo approval cannot pass authenticated gate');
+  const verified = workspaceActor(member, 'team');
+  record = await applyReview(record, command('approve', {}, verified), pack);
+  assert.equal(record.governance.events.at(-1).actor.id, member.id);
+  assert.equal((await publicationChecks(record, pack.version, record.governance.channel, true)).every(item => item.pass), true);
+  await assert.rejects(applyReview(record, command('publish', { text: record.body_text, url: 'http://example.com' }, verified), pack), /HTTPS/);
+  record = await applyReview(record, command('publish', { text: record.body_text, url: 'https://example.com/campaign' }, verified), pack);
+  assert.equal(record.governance.publication.status, 'matching');
+  const baseline = record.body_text;
+  record = await applyReview(record, command('observe', { text: baseline + ' Changed after approval.' }, verified), pack);
+  assert.equal(record.governance.publication.status, 'drift');
+  assert.equal((await publicationChecks(record, pack.version, record.governance.channel, true)).find(item => item.id === 'publication').pass, false);
+  assert.deepEqual(textDifference('Hello world.', 'Hello everyone.'), { prefix: 'Hello ', removed: 'world', added: 'everyone', suffix: '.' });
+  record = await applyReview(record, command('observe', { text: baseline }, verified), pack);
+  assert.equal(record.governance.publication.status, 'matching');
+  assert.equal(readiness(record).approved, true, 'Observations preserve the reviewed version and approval');
+  await assert.rejects(applyReview(record, command('observe', { text: baseline }, creator), pack), /Reviewer/);
+  const expired = { ...pack, facts: [{ ...pack.facts[0], source_doc: JSON.stringify({ title: 'Expired source', expiresAt: '2000-01-01T00:00:00Z' }) }] };
+  await assert.rejects(applyReview(record, command('approve', {}, verified), expired), /expired sources/);
+  assert.equal((await publicationChecks(record, pack.version, record.governance.channel, true, 1)).find(item => item.id === 'expiry').pass, false);
   console.log('Governance model: all assertions passed (scan, evidence, accessibility, decisions, concurrency, approval invalidation).');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

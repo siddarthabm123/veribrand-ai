@@ -1,4 +1,5 @@
 'use client';
+import { authFetch } from '@/lib/auth-fetch';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight, Check, FileCheck2, RefreshCw, Sparkles } from 'lucide-react';
@@ -26,7 +27,7 @@ export default function GuidelineAutoDrafter() {
     setRefreshing(true);
     const local = readSubmissions();
     try {
-      const response = await fetch('/api/submissions', { cache: 'no-store' });
+      const response = await authFetch('/api/submissions', { cache: 'no-store' });
       const baseline = response.ok ? await response.json() as Submission[] : [];
       const merged = new Map(baseline.map((record) => [record.id, record]));
       local.forEach((record) => merged.set(record.id, record));

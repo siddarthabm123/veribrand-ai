@@ -155,7 +155,7 @@ async function loadDatabaseSubmissions(client: NonNullable<ReturnType<typeof get
 
 export async function getKnowledge() {
   const client = getSupabaseAdmin();
-  if (!client) return { guidelines: seedGuidelines, facts: [...seedFacts, ...memoryFacts], rules: seedRules, customGuidelines: memoryGuidelines };
+  if (!client) return { guidelines: seedGuidelines, facts: [...new Map([...seedFacts, ...memoryFacts].map(fact => [fact.fact_key, fact])).values()], rules: seedRules, customGuidelines: memoryGuidelines };
   const [guidelineResult, factResult, ruleResult] = await Promise.all([
     client.from('brand_guidelines').select('section_code,title,category,content').limit(500),
     client.from('approved_facts').select('fact_key,claim_statement,exact_value,source_doc').limit(500),
@@ -279,6 +279,20 @@ export async function getEvidencePack() { return evidencePack(await getKnowledge
 export async function addApprovedFact(fact: ApprovedFact) {
   const client = getSupabaseAdmin();
   if (client) { const result = await client.from('approved_facts').insert(fact); ensureNoError(result.error); } else memoryFacts.push(fact);
+  return fact;
+}
+export async function replaceApprovedFact(fact: ApprovedFact) {
+  const client = getSupabaseAdmin();
+  if (client) {
+    const result = await client.from('approved_facts').update({ claim_statement: fact.claim_statement, exact_value: fact.exact_value, source_doc: fact.source_doc }).eq('fact_key', fact.fact_key).select('fact_key');
+    ensureNoError(result.error);
+    if (!result.data?.length) throw new GovernanceError('Evidence entry not found.', 404);
+  } else {
+    const index = memoryFacts.findIndex(item => item.fact_key === fact.fact_key);
+    if (index >= 0) memoryFacts[index] = fact;
+    else if ((await getEvidencePack()).facts.some(item => item.fact_key === fact.fact_key)) memoryFacts.push(fact);
+    else throw new GovernanceError('Evidence entry not found.', 404);
+  }
   return fact;
 }
 const reviewLocks = new Map<string, Promise<void>>();

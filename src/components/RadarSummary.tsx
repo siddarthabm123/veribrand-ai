@@ -1,4 +1,5 @@
 'use client';
+import { authFetch } from '@/lib/auth-fetch';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -12,7 +13,7 @@ export default function RadarSummary() {
   const [data, setData] = useState<WorkspaceAnalytics | null>(null);
   useEffect(() => {
     const controller = new AbortController();
-    fetch('/api/analytics', {
+    authFetch('/api/analytics', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ days: 30, submissions: readSubmissions() }),

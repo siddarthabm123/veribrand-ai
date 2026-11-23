@@ -1,5 +1,33 @@
 # VeriBrand AI — Team ArticXCoders
 
+## Review room and publication monitoring
+
+Start at `/impact` (also `/audit/new`): scanning opens the saved review in the same page. The review steps link to the draft, source-linked fixes, sign-off, server publish gate, and publication monitor. `/operations` is the central queue, evidence-impact list, published-drift list, and workspace decision history. The entered workspace now opens this queue instead of the older seeded dashboard.
+
+The publish gate returns a checklist: unresolved findings, current approval, approver identity, content fingerprint, evidence version, evidence expiry, channel, and outstanding published drift. Approve a clean draft, test the gate, edit the draft, then test again to see publication blocked. This API is a gate integration point; it does not deploy to your CMS by itself.
+
+After approval, register the publication's HTTPS URL and exact published text. Later `observe` review actions compare an exact CMS snapshot to the saved approved baseline. The UI shows the changed text, baseline version, last observation, and actor; the decision trail and Passport exports retain those snapshots. A mismatch blocks the gate until the snapshot is corrected or a newly approved publication is registered. URLs are references only: no remote fetching, background crawling, scheduled checks, or automatic notifications are claimed. A CMS job can call the protected review API to submit observations.
+
+Evidence entries now record an owner and optional expiry date (end of day UTC). Brand Admins can edit and renew evidence. Expired sources block new approval and the gate. Changes and expiry conservatively affect the entire evidence pack: the impact view explicitly avoids claiming exact per-fact dependencies. Legacy sources without an expiry show “Not recorded”; they are not assigned fabricated dates.
+
+### Enforced workspace access
+
+`src/proxy.ts` protects **all `/api/*` routes**, including reads and exports. When a Supabase project URL is configured, authenticated mode is the default; `VERIBRAND_AUTH_MODE=required` also fails closed if configuration is absent. Every request verifies its Bearer token with Supabase `getUser`, checks workspace membership, and derives its role from **server-controlled `app_metadata`**. The proxy strips incoming identity headers before forwarding its verified actor. Review routes ignore client-supplied actor names/roles in authenticated mode. Signup metadata and browser persona state cannot grant privileges. The gate rejects old demo approvals in authenticated mode.
+
+This deployment serves **one workspace**, selected by `VERIBRAND_WORKSPACE_ID` (default `veribrand`). The project owner must provision each allowed account through Supabase Admin/Dashboard with app metadata:
+
+```json
+{"veribrand_workspace":"veribrand","veribrand_role":"Brand Reviewer"}
+```
+
+Allowed roles: `Content Creator`, `Brand Reviewer`, `Brand Admin`. Creators can submit/edit but cannot approve, reject, override, register publication, or submit monitoring observations. Reviewers can decide and check the gate. Only admins can create/update evidence and phrase rules. New signups have no workspace membership until provisioned; the UI explains this rather than granting reviewer access automatically. No tenant or role administration UI is included.
+
+Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or legacy anon key), and server-only `SUPABASE_SECRET_KEY` / `SUPABASE_SERVICE_ROLE_KEY`. Authenticated production mode also requires persistent storage and blocks requests if the server database key is missing. Existing Supabase tables are reused; no new migration is required. This is a server-enforced single-workspace boundary, not a multi-tenant RLS design.
+
+With no Supabase project URL, the local app remains a labelled demo. `VERIBRAND_AUTH_MODE=demo` explicitly enables demo mode; do not use it with private production data. Public demo records and persona selection are intentionally not authenticated.
+
+Verification: `npm test`, TypeScript, lint, and `node scripts/test-publishing-api.mjs` against a disposable demo dev server. `scripts/test-access-api.mjs` is an integration test for required mode with a disposable local identity stub (creator/reviewer/admin/outsider tokens); it does not test real Supabase email delivery or a live project. Do not run either mutation test against production data.
+
 ## Complete governance workflow
 
 - **Claim Evidence Library** at `/evidence`: search approved wording and source documents; demo admins can add an evidence entry with a source link and a named approval. The evidence pack has a deterministic version fingerprint.
@@ -14,7 +42,7 @@ Start at `/impact`. The demo runs without credentials. `npm test` checks the gov
 
 Versioned governance records are stored in the existing `submissions.image_meta.governance_record` JSONB envelope, including the canonical findings/comments snapshot, evidence snapshot, and append-only decision trail. No new database schema is required. Updates use a revision comparison to reject stale writes; legacy finding/comment/history tables remain mirrors for compatibility. Without Supabase, the same workflow uses an in-memory demo store and cannot guarantee survival across serverless cold starts or cross-instance sharing. The shared database is required for durable share links.
 
-Reviewers are self-selected demo personas, not authenticated identities. Use non-sensitive demo content: anyone who has a passport URL can view the record. The SHA-256 value is a content fingerprint, not a cryptographic signature or compliance guarantee. Only checks actually executed are marked pass/fail; semantic AI review and full WCAG/legal compliance are not certified. The existing optional AI request is not used as a structured enforcement finding.
+In demo mode, reviewers are self-selected personas. Authenticated deployments enforce the workspace access policy described above. Use non-sensitive demo content: anyone who has a passport URL can view the record. The SHA-256 value is a content fingerprint, not a cryptographic signature or compliance guarantee. Only checks actually executed are marked pass/fail; semantic AI review and full WCAG/legal compliance are not certified. The existing optional AI request is not used as a structured enforcement finding.
 
 PDFs wrap long lines and paginate the full trail. Characters outside the built-in PDF font appear as Unicode code points; JSON and the web view preserve the original Unicode text.
 
@@ -74,7 +102,7 @@ Open [http://localhost:3000](http://localhost:3000). No environment variables ar
 - **Tier 1 rules:** deterministic checks make supported phrase, fact, and contrast decisions repeatable and cite their rule source.
 - **Tier 2 AI:** when `OPENAI_API_KEY` is configured, the audit engine sends a PII-redacted review request. Deterministic findings remain available without it. AI output is not currently converted into structured findings, so the product does not rely on the AI request for enforcement.
 - **Hybrid persistence:** with server-side Supabase credentials, repository reads/writes cover submissions, findings, comments, revision history, and custom guideline rules. Without Supabase, an in-memory seeded server fallback and browser `localStorage` keep the demo usable. Browser storage is device-local and does not synchronize between users.
-- **Supabase security:** service/secret keys are server-only. Row Level Security is enabled by `supabase/enable_rls.sql`; apply it in the Supabase SQL Editor for an existing project. This prototype uses a server admin client and does not provide authenticated per-user database authorization, so expose it only to a trusted demo audience until real authentication and policies are implemented.
+- **Supabase security:** service/secret keys are server-only. Row Level Security is enabled by `supabase/enable_rls.sql`; apply it in the Supabase SQL Editor for an existing project. This app uses a server admin client behind verified single-workspace membership and server-assigned roles. It does not provide multi-tenant database isolation.
 - **Vercel:** compatible with the Next.js preset. A deployment is live only after its URL has been checked.
 
 ### Optional environment variables
@@ -121,8 +149,8 @@ Replace teammate placeholders with verified full names before final submission.
 This is a hackathon prototype, not a production compliance guarantee. Demo role selection is not an authentication system. The optional AI response currently does not create structured findings. Browser-local state is limited to one browser profile, while Supabase-backed records are shared by this server-admin prototype. Validate policies, access control, privacy, accessibility, and deployed behavior before making publication decisions from it.
 # Account access
 
-Account screens are available at `/login`, `/signup`, `/forgot-password`, and `/reset-password`. These use Supabase email/password authentication, with email confirmation, recovery, password visibility, and provider sign-out. No password is stored in the app's demo-persona storage.
+Account screens are available at `/login`, `/signup`, `/forgot-password`, and `/reset-password`. These use Supabase email/password authentication, recovery, password visibility, and provider sign-out. For direct signup, the owner must disable Confirm email in the Supabase Email provider settings. No password is stored in the app's demo-persona storage.
 
 Configure `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in your deployment, then rebuild. In Supabase Auth, enable email/password, configure SMTP for production delivery, set the Site URL, and allow the exact deployment URLs ending in `/auth/callback` and `/reset-password` (also localhost for development). Email confirmation uses `/auth/callback`; password recovery uses `/reset-password`. Existing service-role credentials are server-only and do not configure browser Auth. Without public credentials, account forms show an honest setup state and demo access remains available.
 
-This adds account identity, not tenant isolation or production authorization. The existing shared demo APIs and persona role selectors remain demo workflows. Production private workspaces require server-verified sessions, organization membership checks, row-level ownership policies, and removal of demo role overrides before private data is accepted. New accounts enter as Content Creator; display-name metadata never assigns privileges.
+Authentication now feeds the server-enforced workspace access policy described above. Persona selection remains available only in demo mode. New accounts need an owner-provisioned workspace membership and role; display-name metadata never grants privileges. Multi-tenant workspaces remain outside this single-workspace deployment.

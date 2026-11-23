@@ -1,4 +1,26 @@
 /* VeriBrand Studio: governance workspace, using the existing brand tokens. */
+/* Review-room extensions preserve the Studio palette and reduced-motion behavior. */
+.gv-access-notice { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 16px 0; border-bottom: 1px solid var(--vb-rule); font-size: 13px; }
+.gv-access-notice span { color: var(--vb-muted); flex: 1; min-width: min(240px, 100%); }
+.gv-review-steps { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 20px 0; border-bottom: 1px solid var(--vb-rule); font-size: 13px; }
+.gv-overview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin: 0 0 32px; }
+.gv-overview article { border-top: 1px solid var(--vb-muted); padding-block: 18px; display: grid; gap: 8px; }
+.gv-overview strong { font: 400 48px/1 var(--vb-font-display); }
+.gv-overview span { color: var(--vb-muted); font-size: 14px; }
+.gv-queue-heading { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+.gv-queue-heading label { width: 240px; max-width: 100%; }
+.gv-queue-row { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr); gap: 24px; padding: 22px 0; border-top: 1px solid var(--vb-rule); text-decoration: none; }
+.gv-queue-row div { display: grid; gap: 8px; }
+.gv-queue-row span { font-size: 13px; color: var(--vb-muted); }
+.gv-gate-checks { list-style: none; padding: 0; display: grid; gap: 10px; margin-block: 24px; }
+.gv-gate-checks li { display: flex; gap: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--vb-rule); font-size: 14px; }
+.gv-gate-checks b { min-width: 60px; }
+.gv-monitor-status { display: grid; gap: 12px; border-left: 3px solid var(--vb-object-face); padding: 12px 20px; margin-bottom: 24px; }
+.gv-monitor-status.drift { border-color: var(--vb-focus); }
+.gv-monitor-status span { font-size: 13px; color: var(--vb-muted); }
+.gv-page :is(section, div)[id] { scroll-margin-top: 24px; }
+.gv-page fieldset { min-width: 0; }
+@media (max-width: 680px) { .gv-overview { grid-template-columns: minmax(0, 1fr); gap: 8px; } .gv-queue-row { grid-template-columns: minmax(0, 1fr); gap: 8px; } .gv-review-steps { gap: 12px 16px; } }
 .gv-page { max-width: 1280px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 56px) 80px; color: var(--vb-ink); font: 400 16px/1.6 var(--vb-font-body); overflow-wrap: anywhere; }
 body:has(.gv-page) { background: var(--vb-paper); }
 body:has(.gv-page) > .passport-launcher { display: none; }

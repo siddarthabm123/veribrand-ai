@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+import { downloadRecord } from '@/lib/auth-fetch';
 import { contrast, readiness, type VisualInput } from '@/lib/governance';
 import type { Submission } from '@/types/governance';
 
@@ -19,6 +21,7 @@ export function CheckLedger({ record }: { record: Submission }) {
 }
 
 export function PassportLinks({ record }: { record: Submission }) {
+  const [error, setError] = useState('');
   const base = `/api/submissions/${encodeURIComponent(record.id)}/passport`;
-  return <nav className="gv-exports" aria-label="Brand Passport exports"><a href={`${base}?format=pdf`}>Download PDF</a><a href={`${base}?format=json`}>Download JSON</a><a href={`${base}?format=markdown`}>Download Markdown</a><a href={`/passport/${encodeURIComponent(record.id)}?version=${record.governance?.version ?? 0}`}>Open shareable passport</a></nav>;
+  return <nav className="gv-exports" aria-label="Brand Passport exports">{(['pdf', 'json', 'markdown'] as const).map(format => <button className="gv-quiet" key={format} onClick={() => { setError(''); void downloadRecord(`${base}?format=${format}&version=${record.governance?.version}`, `Brand-Passport.${format === 'markdown' ? 'md' : format}`).catch(cause => setError(cause.message)); }}>Download {format.toUpperCase()}</button>)}{error && <p role="alert">{error}</p>}<a href={`/passport/${encodeURIComponent(record.id)}?version=${record.governance?.version ?? 0}`}>Open shareable passport</a></nav>;
 }

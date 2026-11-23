@@ -1,4 +1,5 @@
 'use client';
+import { authFetch } from '@/lib/auth-fetch';
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
@@ -43,7 +44,7 @@ export default function KnowledgePage() {
   const [saving, setSaving] = useState(false);
   useEffect(() => {
     let active = true;
-    void fetch('/api/knowledge', { cache: 'no-store' }).then(async (response) => {
+    void authFetch('/api/knowledge', { cache: 'no-store' }).then(async (response) => {
       if (!response.ok) return null;
       return await response.json() as { customGuidelines?: Array<{ id: string; name: string; phrase: string; replacement: string; category: string; explanation: string }> };
     }).then((remote) => {
@@ -71,7 +72,7 @@ export default function KnowledgePage() {
     if (guidelines.some((item) => item.phrase?.toLowerCase() === next.phrase.toLowerCase())) { setFormMessage('That phrase already has a workspace rule.'); setSaving(false); return; }
     const custom = [...guidelines.filter((item) => !defaults.some((base) => base.id === item.id)), next];
     try {
-      const response = await fetch('/api/knowledge', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...next, explanation: next.description }) });
+      const response = await authFetch('/api/knowledge', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...next, explanation: next.description }) });
       if (!response.ok) throw new Error('The workspace could not save this rule.');
       const result = await response.json() as { entry?: { id: string } };
       if (result.entry) next.id = result.entry.id;

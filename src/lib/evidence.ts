@@ -21,5 +21,12 @@ export function validateFact(value: unknown): ApprovedFact {
   const title = required('claim', 200), exact = required('approvedWording', 200), source = required('sourceTitle', 200), approvedBy = required('approvedBy', 80);
   let url = typeof input.sourceUrl === 'string' ? input.sourceUrl.trim() : '';
   if (url) { try { const parsed = new URL(url); if (parsed.protocol !== 'https:' || parsed.username || parsed.password || url.length > 1000) throw new Error(); url = parsed.href; } catch { throw new Error('Use an HTTPS source URL without embedded credentials.'); } }
-  return { fact_key: `evidence-${crypto.randomUUID()}`, claim_statement: title, exact_value: exact, source_doc: JSON.stringify({ title: source, url, approvedBy, at: new Date().toISOString() }) };
+  const owner = typeof input.owner === 'string' && input.owner.trim() ? input.owner.trim().slice(0, 80) : approvedBy;
+  let expiresAt = '';
+  if (input.expiresAt) {
+    if (typeof input.expiresAt !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(input.expiresAt) || !Number.isFinite(Date.parse(input.expiresAt))) throw new Error('Provide a valid expiry date.');
+    expiresAt = new Date(input.expiresAt + 'T23:59:59.999Z').toISOString();
+    if (expiresAt.slice(0, 10) !== input.expiresAt) throw new Error('Provide a real calendar date for expiry.');
+  }
+  return { fact_key: `evidence-${crypto.randomUUID()}`, claim_statement: title, exact_value: exact, source_doc: JSON.stringify({ title: source, url, approvedBy, owner, expiresAt, at: new Date().toISOString() }) };
 }

@@ -1,5 +1,6 @@
 import { getGovernedSubmission, reviewSubmission } from '@/lib/repository';
 import { GovernanceError, normalizeVisual, type ReviewCommand } from '@/lib/governance';
+import { requestActor } from '@/lib/access';
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -14,9 +15,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   let input: ReviewCommand;
   try {
     input = await request.json();
-    if (!input || typeof input !== 'object' || Array.isArray(input) || !['accept', 'edit', 'reject', 'override', 'revise', 'approve', 'request_changes', 'comment', 'rescan'].includes(input.action)) throw new GovernanceError('Use a named review action; direct status/findings patches are not accepted.');
+    if (!input || typeof input !== 'object' || Array.isArray(input) || !['accept', 'edit', 'reject', 'override', 'revise', 'approve', 'request_changes', 'comment', 'rescan', 'publish', 'observe'].includes(input.action)) throw new GovernanceError('Use a named review action; direct status/findings patches are not accepted.');
+    const verified = requestActor(request);
+    if (verified) input.actor = verified;
+    else if (input.actor) input.actor = { name: input.actor.name, role: input.actor.role };
     if (!Number.isInteger(input.expectedRevision) || typeof input.actor?.name !== 'string' || !['Content Creator', 'Brand Reviewer', 'Brand Admin'].includes(input.actor?.role)) throw new GovernanceError('Include the current revision and a named demo role.');
-    for (const key of ['findingId', 'replacement', 'reason', 'text'] as const) if (input[key] !== undefined && typeof input[key] !== 'string') throw new GovernanceError(`Provide ${key} as text.`);
+    for (const key of ['findingId', 'replacement', 'reason', 'text', 'url'] as const) if (input[key] !== undefined && typeof input[key] !== 'string') throw new GovernanceError(`Provide ${key} as text.`);
     if (input.visual !== undefined) input.visual = normalizeVisual(input.visual);
   } catch (error) { return Response.json({ error: error instanceof Error ? error.message : 'Send a valid review action.' }, { status: 400 }); }
   try {

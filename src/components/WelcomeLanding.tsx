@@ -87,7 +87,7 @@ export default function WelcomeLanding({ onEnter }: { onEnter?: (session: Active
       <div className="vb-hero-copy">
         <h1>Keep your<br/>brand’s word.</h1>
         <p>Check claims, copy, and colors before your brand goes public.</p>
-        <div className="vb-hero-actions"><button className="vb-button" type="button" onClick={() => enter('Alex Morgan', 'Brand Reviewer', 'reviewer@acmecloud.demo')}>Explore workspace</button><a className="vb-text-link" href="/impact">Try Brand Passport</a></div>
+        <div className="vb-hero-actions"><button className="vb-button" type="button" onClick={() => enter('Alex Morgan', 'Brand Reviewer', 'reviewer@acmecloud.demo')}>Explore workspace</button><a className="vb-text-link" href="/impact">Start a review</a></div>
       </div>
       <BrandSculpture />
       <div className="vb-hero-foot"><span><Check size={16} aria-hidden="true" />No account required</span><span><LockKeyhole size={16} aria-hidden="true" />Human sign-off, always</span><a href="#product">See what’s inside<ChevronDown size={16} aria-hidden="true" /></a></div>

@@ -1,4 +1,5 @@
 'use client';
+import { authFetch } from '@/lib/auth-fetch';
 
 import { useEffect, useRef, useState } from 'react';
 import mammoth from 'mammoth/mammoth.browser';
@@ -167,7 +168,7 @@ export default function CampaignInspector() {
     if (sampleLock.current) return;
     sampleLock.current = true; setSampleBusy(true);
     try {
-      const response = await fetch('/samples/sample-campaign-brief.docx');
+      const response = await authFetch('/samples/sample-campaign-brief.docx');
       if (!response.ok) throw new Error('The sample DOCX is temporarily unavailable.');
       await loadFile(new File([await response.blob()], 'sample-campaign-brief.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }));
     } catch (cause) { setText(demoBrief); setFileName('sample-campaign-brief.docx'); setMessage(cause instanceof Error ? cause.message : 'The sample brief could not be loaded.'); }
@@ -178,7 +179,7 @@ export default function CampaignInspector() {
     if (sampleLock.current) return;
     sampleLock.current = true; setSampleBusy(true);
     try {
-      const response = await fetch('/samples/sample-promo-banner.png');
+      const response = await authFetch('/samples/sample-promo-banner.png');
       if (!response.ok) throw new Error('The sample PNG is temporarily unavailable.');
       await loadFile(new File([await response.blob()], 'sample-promo-banner.png', { type: 'image/png' }));
     } catch (cause) { setMessage(cause instanceof Error ? cause.message : 'The sample banner could not be loaded.'); }
@@ -193,7 +194,7 @@ export default function CampaignInspector() {
     try {
       const customRules = readCustomGuidelines();
       try {
-        const response = await fetch('/api/submissions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, title: fileName.replace(/\.[^.]+$/, '') || 'Campaign asset audit', content_type: report ? 'Campaign banner' : 'Campaign brief', body_text: text, author_name: 'Demo creator', customRules, visual: report ? { foreground: report.foreground, background: report.background, imagePurpose, altText } : undefined, channel: 'Website CMS', visualFindings: imageFindings, imageInspection: report ? { dominantColors: report.dominantColors, paletteMatches: report.paletteMatches, contrastRatio: report.contrastRatio, aspectRatio: report.aspectRatio, clearSpacePercent: report.clearSpacePercent } : undefined }) });
+        const response = await authFetch('/api/submissions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, title: fileName.replace(/\.[^.]+$/, '') || 'Campaign asset audit', content_type: report ? 'Campaign banner' : 'Campaign brief', body_text: text, author_name: 'Demo creator', customRules, visual: report ? { foreground: report.foreground, background: report.background, imagePurpose, altText } : undefined, channel: 'Website CMS', visualFindings: imageFindings, imageInspection: report ? { dominantColors: report.dominantColors, paletteMatches: report.paletteMatches, contrastRatio: report.contrastRatio, aspectRatio: report.aspectRatio, clearSpacePercent: report.clearSpacePercent } : undefined }) });
         if (!response.ok) throw new Error('The review service could not save this audit.');
         const record = await response.json() as Submission; saveSubmission(record); setSaved(record); setMessage(`Audit saved with ${record.findings.length} cited finding${record.findings.length === 1 ? '' : 's'}.`);
       } catch {

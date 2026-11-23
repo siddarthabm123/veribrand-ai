@@ -1,12 +1,13 @@
 import type { ApprovedFact, AuditFinding, BrandGuideline, BrandRules, CustomAuditRule, Submission } from '@/types/governance';
 
-export type ReviewActor = { name: string; role: 'Content Creator' | 'Brand Reviewer' | 'Brand Admin' };
+export type ReviewActor = { name: string; role: 'Content Creator' | 'Brand Reviewer' | 'Brand Admin'; id?: string; verified?: boolean };
+export type Publication = { url: string; baseline: string; baselineHash: string; baselineVersion: number; observed: string; checkedAt: string; status: 'matching' | 'drift'; actor: ReviewActor };
 export type VisualInput = { foreground?: string; background?: string; largeText?: boolean; imagePurpose: 'none' | 'informative' | 'decorative'; altText: string };
 export type CheckedRule = { id: string; title: string; status: 'pass' | 'fail' | 'not_run'; detail: string; source: string; engine: 'deterministic' | 'not_run' };
 export type EvidencePack = { version: string; facts: ApprovedFact[]; guidelines: BrandGuideline[]; rules: BrandRules; customGuidelines: CustomAuditRule[] };
 export type ReviewEvent = { id: string; action: string; actor: ReviewActor; at: string; version: number; evidenceVersion?: string; finding?: AuditFinding; reason?: string; before?: string; after?: string };
-export type Governance = { schema: 1; revision: number; version: number; original: string; contentHash: string; knowledgeVersion: string; evidence?: EvidencePack; checks: CheckedRule[]; visual: VisualInput; events: ReviewEvent[]; channel: string; approvedHash?: string; approvedAt?: string; approvedBy?: string };
-export type ReviewCommand = { action: 'accept' | 'edit' | 'reject' | 'override' | 'revise' | 'approve' | 'request_changes' | 'comment' | 'rescan'; expectedRevision: number; actor: ReviewActor; findingId?: string; replacement?: string; reason?: string; text?: string; visual?: VisualInput };
+export type Governance = { schema: 1; revision: number; version: number; original: string; contentHash: string; knowledgeVersion: string; evidence?: EvidencePack; checks: CheckedRule[]; visual: VisualInput; events: ReviewEvent[]; channel: string; approvedHash?: string; approvedAt?: string; approvedBy?: string; publication?: Publication };
+export type ReviewCommand = { action: 'accept' | 'edit' | 'reject' | 'override' | 'revise' | 'approve' | 'request_changes' | 'comment' | 'rescan' | 'publish' | 'observe'; expectedRevision: number; actor: ReviewActor; findingId?: string; replacement?: string; reason?: string; text?: string; visual?: VisualInput; url?: string };
 
 export class GovernanceError extends Error {
   constructor(message: string, public status = 400) { super(message); }
@@ -17,8 +18,11 @@ export async function fingerprint(value: unknown): Promise<string> {
   return Array.from(new Uint8Array(bytes), byte => byte.toString(16).padStart(2, '0')).join('');
 }
 export function sourceDetails(source: string) {
-  try { const value = JSON.parse(source); if (value && typeof value.title === 'string') return { title: value.title as string, url: typeof value.url === 'string' ? value.url : '', approvedBy: typeof value.approvedBy === 'string' ? value.approvedBy : 'Not recorded', at: typeof value.at === 'string' ? value.at : '' }; } catch { /* Older sources are plain document titles. */ }
-  return { title: source, url: '', approvedBy: 'Not recorded', at: '' };
+  try { const value = JSON.parse(source); if (value && typeof value.title === 'string') return { title: value.title as string, url: typeof value.url === 'string' ? value.url : '', approvedBy: typeof value.approvedBy === 'string' ? value.approvedBy : 'Not recorded', at: typeof value.at === 'string' ? value.at : '', expiresAt: typeof value.expiresAt === 'string' ? value.expiresAt : '', owner: typeof value.owner === 'string' ? value.owner : value.approvedBy || 'Not recorded' }; } catch { /* Older sources are plain document titles. */ }
+  return { title: source, url: '', approvedBy: 'Not recorded', at: '', expiresAt: '', owner: 'Not recorded' };
+}
+export function expiredEvidence(pack: EvidencePack, now = Date.now()) {
+  return pack.facts.filter(fact => { const expiry = sourceDetails(fact.source_doc).expiresAt; return expiry && Date.parse(expiry) <= now; });
 }
 export function normalizeVisual(value: unknown): VisualInput {
   const input = value && typeof value === 'object' ? value as Record<string, unknown> : {};
@@ -105,13 +109,29 @@ export async function applyReview(record: Submission, command: ReviewCommand, pa
   const g = current.governance!;
   if (!Number.isInteger(command.expectedRevision) || command.expectedRevision !== g.revision) throw new GovernanceError('This review changed. Reload the latest version before making a decision.', 409);
   if (!command.actor?.name?.trim() || !['Content Creator', 'Brand Reviewer', 'Brand Admin'].includes(command.actor.role)) throw new GovernanceError('Choose a named demo reviewer.');
-  const actor = { name: command.actor.name.trim().slice(0, 80), role: command.actor.role };
-  if (['approve', 'request_changes', 'override', 'reject'].includes(command.action) && actor.role === 'Content Creator') throw new GovernanceError('A demo Brand Reviewer or Brand Admin must make this decision.', 403);
+  const actor: ReviewActor = { name: command.actor.name.trim().slice(0, 80), role: command.actor.role, ...(command.actor.id ? { id: command.actor.id, verified: command.actor.verified === true } : {}) };
+  if (['approve', 'request_changes', 'override', 'reject', 'publish', 'observe'].includes(command.action) && actor.role === 'Content Creator') throw new GovernanceError('A Brand Reviewer or Brand Admin must make this decision.', 403);
   if (g.events.length >= 500) throw new GovernanceError('This record has reached its demo history limit. Create a new draft.');
   const at = new Date().toISOString();
   const event: ReviewEvent = { id: crypto.randomUUID(), action: command.action, actor, at, version: g.version, evidenceVersion: g.knowledgeVersion };
   let bodyChanged = false;
-  if (['accept', 'edit', 'reject', 'override'].includes(command.action)) {
+  if (command.action === 'publish' || command.action === 'observe') {
+    if (typeof command.text !== 'string' || !command.text.trim() || command.text.length > 100_000) throw new GovernanceError('Provide the published content snapshot (1–100,000 characters).');
+    if (command.action === 'publish') {
+      if (!readiness(current).approved || g.knowledgeVersion !== pack.version || g.contentHash !== await hashContent(current, g.visual)) throw new GovernanceError('Pass the publish gate with current evidence and human approval before registering a publication.', 409);
+      if (expiredEvidence(pack).length || (actor.verified && !g.events.findLast(item => item.action === 'approve')?.actor.verified)) throw new GovernanceError('Current, unexpired evidence and a verified approver are required to register publication.', 409);
+      let url: URL;
+      try { url = new URL(command.url || ''); } catch { throw new GovernanceError('Provide the HTTPS publication URL.'); }
+      if (url.protocol !== 'https:' || url.username || url.password || url.hash) throw new GovernanceError('Use an HTTPS URL without credentials or a fragment.');
+      g.publication = { url: url.href, baseline: current.body_text, baselineHash: g.contentHash, baselineVersion: g.version, observed: '', checkedAt: at, status: 'matching', actor };
+    }
+    if (!g.publication) throw new GovernanceError('Register an approved publication before checking for changes.', 409);
+    event.before = g.publication.observed || g.publication.baseline;
+    event.after = command.text;
+    g.publication.observed = command.text; g.publication.checkedAt = at; g.publication.actor = actor;
+    g.publication.status = command.text === g.publication.baseline ? 'matching' : 'drift';
+    event.reason = `${g.publication.status}: CMS snapshot compared with approved v${g.publication.baselineVersion}. URL is a reference; no remote fetch was performed.`;
+  } else if (['accept', 'edit', 'reject', 'override'].includes(command.action)) {
     const finding = current.findings.find(f => f.id === command.findingId);
     if (!finding || !['pending', 'rejected'].includes(finding.reviewer_status)) throw new GovernanceError('This finding is no longer open. Reload the review.', 409);
     event.finding = structuredClone(finding);
@@ -139,6 +159,7 @@ export async function applyReview(record: Submission, command: ReviewCommand, pa
   } else if (command.action === 'approve') {
     if (g.contentHash !== await hashContent(current, g.visual)) throw new GovernanceError('The content no longer matches its scan. Rescan before approving.', 409);
     if (g.knowledgeVersion !== pack.version) throw new GovernanceError('The evidence pack changed. Rescan before approving.', 409);
+    if (expiredEvidence(pack).length) throw new GovernanceError('The evidence pack contains expired sources. A Brand Admin must refresh their expiry before approval.', 409);
     if (readiness(current).open) throw new GovernanceError('Resolve or explicitly override every open finding before approval.', 409);
     current.status = 'approved'; current.reviewer_name = actor.name; g.approvedHash = g.contentHash; g.approvedAt = at; g.approvedBy = actor.name;
   } else if (command.action === 'request_changes') current.status = 'changes_requested';
@@ -152,7 +173,7 @@ export async function applyReview(record: Submission, command: ReviewCommand, pa
     g.contentHash = await hashContent(current, g.visual);
     current.status = current.findings.length ? 'audited' : 'draft';
   }
-  if (command.action !== 'approve' && command.action !== 'comment') { delete g.approvedHash; delete g.approvedAt; delete g.approvedBy; if (current.status === 'approved') current.status = 'audited'; }
+  if (!['approve', 'comment', 'publish', 'observe'].includes(command.action)) { delete g.approvedHash; delete g.approvedAt; delete g.approvedBy; if (current.status === 'approved') current.status = 'audited'; }
   event.version = g.version; g.events.push(event); g.revision++;
   if (JSON.stringify(g).length > 2_000_000) throw new GovernanceError('This record has reached its demo history size limit. Start a new draft.');
   current.history.push(`${actor.name}: ${command.action} on v${g.version} at ${at}`);

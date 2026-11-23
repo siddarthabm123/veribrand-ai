@@ -1,4 +1,5 @@
 'use client';
+import { authFetch } from '@/lib/auth-fetch';
 
 import { useEffect, useState } from 'react';
 import type { WorkspaceAnalytics } from '@/types/governance';
@@ -27,7 +28,7 @@ export default function AnalyticsDashboard() {
       setLoading(true);
       setError('');
       try {
-        const response = await fetch('/api/analytics', {
+        const response = await authFetch('/api/analytics', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ days, submissions: readSubmissions() }),
