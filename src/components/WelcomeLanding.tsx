@@ -81,7 +81,7 @@ export default function WelcomeLanding({ onEnter }: { onEnter?: (session: Active
       <Link href="/welcome" className="vb-logo" aria-label="VeriBrand AI home"><ShieldCheck size={28} strokeWidth={1.5} aria-hidden="true" /><span>VeriBrand<span className="vb-logo-ai"> AI</span></span></Link>
       <nav className="vb-navigation" aria-label="Main navigation"><a href="#product">The workspace</a><a href="#checks">What we check</a><a href="#roles">Your role</a></nav>
       <details className="vb-quickmenu"><summary>Quick access<ChevronDown size={14} aria-hidden="true"/></summary><nav aria-label="Workspace shortcuts">{quickLinks.map((item) => item.overview ? <Link href={item.href} key={item.href} onClick={(event) => { event.preventDefault(); enter('Alex Morgan', 'Brand Reviewer'); }}>{item.label}</Link> : <Link href={item.href} key={item.href}>{item.label}</Link>)}</nav></details>
-      <button className="vb-nav-action" type="button" onClick={() => enter('Alex Morgan', 'Brand Reviewer', 'reviewer@acmecloud.demo')}>Skip Login &amp; Launch Workspace →</button>
+      <Link className="vb-nav-action" href="/login">Sign in / Create account</Link>
     </header>
     <section className="vb-hero vb-container" id="main-content">
       <div className="vb-hero-copy">

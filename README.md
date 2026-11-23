@@ -119,3 +119,10 @@ Replace teammate placeholders with verified full names before final submission.
 ## Responsible use and limitations
 
 This is a hackathon prototype, not a production compliance guarantee. Demo role selection is not an authentication system. The optional AI response currently does not create structured findings. Browser-local state is limited to one browser profile, while Supabase-backed records are shared by this server-admin prototype. Validate policies, access control, privacy, accessibility, and deployed behavior before making publication decisions from it.
+# Account access
+
+Account screens are available at `/login`, `/signup`, `/forgot-password`, and `/reset-password`. These use Supabase email/password authentication, with email confirmation, recovery, password visibility, and provider sign-out. No password is stored in the app's demo-persona storage.
+
+Configure `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in your deployment, then rebuild. In Supabase Auth, enable email/password, configure SMTP for production delivery, set the Site URL, and allow the exact deployment URLs ending in `/auth/callback` and `/reset-password` (also localhost for development). Email confirmation uses `/auth/callback`; password recovery uses `/reset-password`. Existing service-role credentials are server-only and do not configure browser Auth. Without public credentials, account forms show an honest setup state and demo access remains available.
+
+This adds account identity, not tenant isolation or production authorization. The existing shared demo APIs and persona role selectors remain demo workflows. Production private workspaces require server-verified sessions, organization membership checks, row-level ownership policies, and removal of demo role overrides before private data is accepted. New accounts enter as Content Creator; display-name metadata never assigns privileges.

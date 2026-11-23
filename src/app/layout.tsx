@@ -11,6 +11,7 @@ import './welcome-upgrade.css';
 import './studio.css';
 import './workspace-studio.css';
 import './governance.css';
+import './auth.css';
 
 export const metadata: Metadata = {
   title: 'VeriBrand AI | Keep your brand’s word',
