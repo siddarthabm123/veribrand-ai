@@ -8,7 +8,7 @@ import { getSupabaseBrowser } from '@/lib/supabase/browser';
 import { saveSession } from '@/lib/session';
 
 type Mode = 'login' | 'signup' | 'forgot-password' | 'reset-password' | 'callback';
-const headings: Record<Mode, string> = { login: 'Good to have you back.', signup: 'Make your brand’s word count.', 'forgot-password': 'Let’s get you back in.', 'reset-password': 'A fresh start.', callback: 'Confirming your account.' };
+const headings: Record<Mode, string> = { login: 'Good to have you back.', signup: 'Make your brand’s word count.', 'forgot-password': 'Let’s get you back in.', 'reset-password': 'A fresh start.', callback: 'Opening your workspace.' };
 
 export default function AuthScreen({ mode }: { mode: Mode }) {
   const router = useRouter();
@@ -65,8 +65,11 @@ export default function AuthScreen({ mode }: { mode: Mode }) {
       } else if (mode === 'signup') {
         const result = await client.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth/callback`, data: { full_name: String(values.get('name') || '').trim() } } });
         if (result.error) throw result.error;
-        if (result.data.session) router.replace('/auth/callback');
-        else setMessage('Check your inbox for a confirmation link. Once confirmed, you can sign in.');
+        if (!result.data.session || !result.data.user) {
+          throw new Error('Direct signup is not enabled for this project yet. The project owner must turn off Confirm email in Supabase Authentication → Sign In / Providers → Email.');
+        }
+        saveSession({ name: String(result.data.user.user_metadata?.full_name || email.split('@')[0]), email: result.data.user.email, workspace: 'VeriBrand', role: 'Content Creator', entered: true });
+        router.replace('/');
       } else {
         const result = await client.auth.signInWithPassword({ email, password });
         if (result.error) throw new Error('Unable to sign in. Check your email and password, or reset your password.');
