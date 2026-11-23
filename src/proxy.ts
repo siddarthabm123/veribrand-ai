@@ -12,7 +12,8 @@ export async function proxy(request: NextRequest) {
   const next = () => { const response = NextResponse.next({ request: { headers } }); response.headers.set('Cache-Control', 'no-store'); return response; };
   if (demo) return next();
   const context = request.nextUrl.pathname === '/api/access';
-  const fail = (message: string, status: number) => context ? NextResponse.json({ mode: 'authenticated', actor: null, error: message }, { status: 200, headers: { 'Cache-Control': 'no-store' } }) : NextResponse.json({ error: message }, { status, headers: { 'Cache-Control': 'no-store' } });
+  let signedIn = false;
+  const fail = (message: string, status: number) => context ? NextResponse.json({ mode: 'authenticated', actor: null, signedIn, status, error: message }, { status: 200, headers: { 'Cache-Control': 'no-store' } }) : NextResponse.json({ error: message, signedIn }, { status, headers: { 'Cache-Control': 'no-store' } });
   if (!url || !key) return fail('Authentication configuration is incomplete. Access is blocked.', 503);
   if (process.env.NODE_ENV === 'production' && !process.env.SUPABASE_SECRET_KEY && !process.env.SUPABASE_SERVICE_ROLE_KEY) return fail('Persistent workspace storage is not configured. Ask the project owner to finish database setup.', 503);
   const token = request.headers.get('authorization')?.match(/^Bearer (.+)$/i)?.[1];
@@ -21,6 +22,7 @@ export async function proxy(request: NextRequest) {
     const client = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
     const { data, error } = await client.auth.getUser(token);
     if (error || !data.user) return fail('Your session is invalid or expired. Sign in again.', 401);
+    signedIn = true;
     const actor = workspaceActor(data.user, process.env.VERIBRAND_WORKSPACE_ID || 'veribrand');
     if (!actor) return fail('Your account has no membership in this workspace. Ask the workspace owner to grant access.', 403);
     if (!canMutate(request.nextUrl.pathname, request.method, actor.role)) return fail('Your assigned role cannot perform this action.', 403);
