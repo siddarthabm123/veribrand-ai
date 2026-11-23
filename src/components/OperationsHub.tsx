@@ -1,23 +1,2 @@
-'use client';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { authFetch } from '@/lib/auth-fetch';
-import { readiness, expiredEvidence, type EvidencePack } from '@/lib/governance';
-import type { Submission } from '@/types/governance';
-import WorkspaceAccess, { useWorkspaceAccess } from './WorkspaceAccess';
-
-export default function OperationsHub() {
-  const access = useWorkspaceAccess();
-  const [records, setRecords] = useState<Submission[]>([]), [pack, setPack] = useState<EvidencePack | null>(null);
-  const [filter, setFilter] = useState('all'), [message, setMessage] = useState('Loading saved reviews…');
-  useEffect(() => {
-    let active = true;
-    Promise.all(['/api/submissions', '/api/evidence'].map(async url => { const response = await authFetch(url, { cache: 'no-store' }); const value = await response.json(); if (!response.ok) throw new Error(value.error); return value; })).then(([rows, evidence]) => { if (active) { setRecords(rows); setPack(evidence); setMessage(''); } }).catch(error => { if (active) setMessage(error.message); });
-    return () => { active = false; };
-  }, []);
-  const impacted = records.filter(row => row.governance && (row.governance.knowledgeVersion !== pack?.version || Boolean(pack && expiredEvidence(pack).length)));
-  const drift = records.filter(row => row.governance?.publication?.status === 'drift');
-  const visible = records.filter(row => filter === 'all' || (filter === 'impact' ? impacted.includes(row) : filter === 'drift' ? drift.includes(row) : !readiness(row).approved));
-  const events = records.flatMap(row => (row.governance?.events || []).map(event => ({ ...event, recordId: row.id, title: row.title }))).sort((a, b) => b.at.localeCompare(a.at)).slice(0, 100);
-  return <main className="gv-page"><header className="gv-nav"><Link href="/welcome">VeriBrand</Link><nav><Link href="/impact">New review</Link><Link href="/evidence">Evidence library</Link><Link href="/analytics">Guideline health</Link></nav></header><WorkspaceAccess access={access}/><section className="gv-intro"><h1>One queue. Every decision.</h1><p>Review drafts, find evidence changes, and check published content against its approved version.</p><Link className="gv-primary" href="/impact">Start a review</Link></section><div className="gv-overview"><article><strong>{records.length}</strong><span>Saved reviews</span></article><article><strong>{impacted.length}</strong><span>Evidence changed or expired</span></article><article><strong>{drift.length}</strong><span>Published snapshots with changes</span></article></div><section className="gv-panel"><div className="gv-queue-heading"><h2>Review queue</h2><label>Show<select value={filter} onChange={event => setFilter(event.target.value)}><option value="all">All reviews</option><option value="pending">Awaiting approval</option><option value="impact">Evidence changed</option><option value="drift">Published content changed</option></select></label></div><p role="status">{message}</p>{!message && !visible.length && <p>No reviews match this filter.</p>}{visible.map(row => <Link className="gv-queue-row" key={row.id} href={`/impact/review/${row.id}`}><div><b>{row.title}</b><span>{row.governance?.channel || row.content_type} / v{row.governance?.version || 'unversioned'}</span></div><span>{impacted.includes(row) ? 'Evidence changed; re-review' : readiness(row).label}</span><span>{row.governance?.publication?.status === 'drift' ? 'Published content changed' : `${readiness(row).open} open findings`}</span></Link>)}</section><section className="gv-panel"><h2>Evidence impact</h2><p>Evidence changed or expired for {impacted.length} saved reviews. These reviews cannot pass the publish gate until rescanned and approved again. Expired sources must be renewed by an admin before approval. This is a conservative whole-pack check; it does not claim exact per-fact dependencies.</p>{impacted.map(row => <p key={row.id}><Link href={`/impact/review/${row.id}`}>{row.title}: inspect evidence and rescan</Link></p>)}</section><section className="gv-panel"><h2>Workspace decision history</h2><p>Recorded review actions from saved governance records, newest first.</p><ol className="gv-timeline">{events.map(event => <li key={`${event.recordId}-${event.id}`}><Link href={`/impact/review/${event.recordId}`}>{event.title}</Link><b>{event.action.replaceAll('_', ' ')}</b><span>{event.actor.name} / {event.actor.role}{event.actor.verified ? ' / verified identity' : ' / demo identity'}</span><time dateTime={event.at}>{new Date(event.at).toLocaleString()}</time>{event.reason && <p>{event.reason}</p>}</li>)}</ol></section></main>;
-}
+import Dashboard from './Dashboard';
+export default Dashboard;
