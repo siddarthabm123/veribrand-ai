@@ -1,5 +1,28 @@
 # VeriBrand AI — Team ArticXCoders
 
+## Complete governance workflow
+
+- **Claim Evidence Library** at `/evidence`: search approved wording and source documents; demo admins can add an evidence entry with a source link and a named approval. The evidence pack has a deterministic version fingerprint.
+- **Review decisions** at `/impact/review/[id]`: accept, edit, reject, or override individual findings. Rejections stay open; overrides require a reason. Each action records a name, demo role, timestamp, source, and content version. Original/current text and recorded before/after revisions remain inspectable.
+- **Brand Passport**: download PDF, Markdown, or JSON with the full checks, unrun checks, original/current content, sources, comments, and decision trail. Share a version-pinned `/passport/[id]?version=N` view. Old links refuse to imply approval after content advances.
+- **Accessibility inputs**: compute precise contrast for declared foreground/background colors (normal text 4.5:1, large text 3:1), match declared palette values, and flag missing alt text for declared informative images. Uploaded-image sampling remains an estimate; semantic description quality and final published markup need human review.
+- **Readiness and publish gate**: the displayed score deducts 25/10/5 per open high/medium/low finding. A score of 100 is not approval. The server gate requires no unresolved findings, a recorded sign-off, a matching content fingerprint, an unchanged evidence pack, and the approved channel. Content edits clear approval and rescan the draft.
+
+Start at `/impact`. The demo runs without credentials. `npm test` checks the governance model; `npm run lint` and `npm run build` run project checks.
+
+### Persistence and review scope
+
+Versioned governance records are stored in the existing `submissions.image_meta.governance_record` JSONB envelope, including the canonical findings/comments snapshot, evidence snapshot, and append-only decision trail. No new database schema is required. Updates use a revision comparison to reject stale writes; legacy finding/comment/history tables remain mirrors for compatibility. Without Supabase, the same workflow uses an in-memory demo store and cannot guarantee survival across serverless cold starts or cross-instance sharing. The shared database is required for durable share links.
+
+Reviewers are self-selected demo personas, not authenticated identities. Use non-sensitive demo content: anyone who has a passport URL can view the record. The SHA-256 value is a content fingerprint, not a cryptographic signature or compliance guarantee. Only checks actually executed are marked pass/fail; semantic AI review and full WCAG/legal compliance are not certified. The existing optional AI request is not used as a structured enforcement finding.
+
+PDFs wrap long lines and paginate the full trail. Characters outside the built-in PDF font appear as Unicode code points; JSON and the web view preserve the original Unicode text.
+
+### Review API
+
+`PATCH /api/submissions/:id` accepts a named action (`accept`, `edit`, `reject`, `override`, `revise`, `approve`, `request_changes`, `comment`, or `rescan`), `expectedRevision`, and a named demo `actor`. Direct client-supplied approval statuses or findings arrays are rejected. Stale revisions return 409; the reviewer should reload. `GET /api/submissions/:id/passport?format=pdf|json|markdown&version=N` exports the saved server record.
+
+
 An explainable brand governance workspace that checks campaign copy and assets before publication. It cites the rule behind each finding, offers focused fixes, and keeps a human reviewer in control. A seeded Acme Cloud demo works without a login or API key; add Supabase for durable shared records.
 
 ## Demo Account Credentials
@@ -43,7 +66,7 @@ Open [http://localhost:3000](http://localhost:3000). No environment variables ar
 
 1. **Document and banner inspector:** uploads common brief formats and image assets, extracts text where supported, computes color and contrast checks in the browser, and presents an inspection report.
 2. **Guideline Gap Auto-Drafter:** derives reviewable proposals from recurring findings and overrides. A human approves a proposal before it becomes an active Brand Knowledge rule.
-3. **Live pre-publish gate and PDF certificate:** `POST /api/webhook/gate` returns `403 BLOCKED` while findings remain unresolved, and `200 APPROVED` with a verification signature after sign-off. The review and Brand Passport flows can generate a downloadable PDF certificate.
+3. **Live pre-publish gate and PDF certificate:** `POST /api/webhook/gate` returns `403 BLOCKED` while findings remain unresolved, and `200 APPROVED` with a version-bound content fingerprint after sign-off. The review and Brand Passport flows can generate a downloadable PDF certificate.
 
 ## Architecture and technical decisions
 

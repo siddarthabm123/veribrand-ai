@@ -4,9 +4,12 @@ import { normalizeCustomRules } from './custom-guidelines';
 import type { ApprovedFact, BrandGuideline, BrandRules, CustomAuditRule, Submission, WorkspaceAnalytics } from '@/types/governance';
 import { runAudit } from './audit/engine';
 import { auditText, contrastRatio } from './audit/deterministic';
+import { applyReview, GovernanceError, initializeGovernance, normalizeVisual, type Governance, type ReviewCommand, type VisualInput } from './governance';
+import { evidencePack } from './evidence';
 
 let memoryStore: Submission[] | null = null;
 let memoryGuidelines: CustomAuditRule[] = [];
+const memoryFacts: ApprovedFact[] = [];
 const data = () => (memoryStore ??= structuredClone(seedSubmissions));
 const field = (value: unknown, max: number, fallback = '') => typeof value === 'string' ? value.slice(0, max) : fallback;
 const isUuid = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
@@ -39,7 +42,7 @@ async function getCustomRules(client = getSupabaseAdmin()): Promise<CustomAuditR
 
 function makeSeedRows(): Submission[] {
   return structuredClone(data()).map((row) => {
-    if (row.status === 'audited' && !row.findings.length) {
+    if (!row.governance && row.status === 'audited' && !row.findings.length) {
       row.findings = auditText(row.body_text, row.id);
       if (row.image_meta) {
         const ratio = contrastRatio(row.image_meta.foreground, row.image_meta.background);
@@ -66,6 +69,8 @@ function parseImageMeta(value: unknown): Submission['image_meta'] {
 function mapSubmission(row: Record<string, unknown>, findings: Submission['findings'], comments: string[], history: string[]): Submission {
   const meta = row.image_meta && typeof row.image_meta === 'object' ? row.image_meta as Record<string, unknown> : null;
   const inspection = meta?.inspection;
+  const envelope = meta?.governance_record as { governance?: Governance; findings?: Submission['findings']; comments?: string[] } | undefined;
+  const managed = envelope?.governance?.schema === 1 && Array.isArray(envelope.findings) && Array.isArray(envelope.comments) ? envelope : undefined;
   return {
     id: field(row.id, 128), title: field(row.title, 160, 'Untitled submission'), content_type: field(row.content_type, 80, 'Copy'),
     body_text: field(row.body_text, 100_000), status: ['draft', 'audited', 'changes_requested', 'approved'].includes(String(row.status)) ? row.status as Submission['status'] : 'draft',
@@ -73,6 +78,7 @@ function mapSubmission(row: Record<string, unknown>, findings: Submission['findi
     created_at: typeof row.created_at === 'string' ? row.created_at : new Date().toISOString(),
     findings, comments, history, ...(parseImageMeta(row.image_meta) ? { image_meta: parseImageMeta(row.image_meta) } : {}),
     ...(inspection && typeof inspection === 'object' ? { image_inspection: inspection as Submission['image_inspection'] } : {}),
+    ...(managed ? { governance: managed.governance, findings: managed.findings!, comments: managed.comments! } : {}),
   };
 }
 
@@ -81,15 +87,24 @@ function commentParts(comment: string, fallbackAuthor: string) {
   return { author_name: match?.[1].trim() || fallbackAuthor, body: (match?.[2] ?? comment).trim() };
 }
 
-async function writeSubmission(client: NonNullable<ReturnType<typeof getSupabaseAdmin>>, row: Submission): Promise<Submission> {
+async function writeSubmission(client: NonNullable<ReturnType<typeof getSupabaseAdmin>>, row: Submission, expectedRevision?: number): Promise<Submission> {
   const findings = row.findings.map((finding) => ({ ...finding, id: isUuid(finding.id) ? finding.id : crypto.randomUUID(), submission_id: row.id }));
-  const imageMeta = row.image_meta ? { ...row.image_meta, ...(row.image_inspection ? { inspection: row.image_inspection } : {}) } : row.image_inspection ? { inspection: row.image_inspection } : null;
+  // Keep versioned review metadata in the existing JSONB envelope; split it into a dedicated table when the demo becomes multi-tenant.
+  const imageMeta = { ...(row.image_meta ?? {}), ...(row.image_inspection ? { inspection: row.image_inspection } : {}), ...(row.governance ? { governance_record: { governance: row.governance, findings, comments: row.comments } } : {}) };
   const submissionRow = {
     id: row.id, title: row.title, content_type: row.content_type, body_text: row.body_text, image_meta: imageMeta,
     status: row.status, author_name: row.author_name, reviewer_name: row.reviewer_name ?? null, created_at: row.created_at,
   };
-  const saved = await client.from('submissions').upsert(submissionRow, { onConflict: 'id' });
-  ensureNoError(saved.error);
+  if (expectedRevision === undefined) {
+    const saved = await client.from('submissions').upsert(submissionRow, { onConflict: 'id' });
+    ensureNoError(saved.error);
+  } else {
+    let query = client.from('submissions').update(submissionRow).eq('id', row.id);
+    query = expectedRevision ? query.eq('image_meta->governance_record->governance->>revision', String(expectedRevision)) : query.is('image_meta->governance_record', null);
+    const saved = await query.select('id');
+    ensureNoError(saved.error);
+    if (!saved.data?.length) throw new GovernanceError('This review changed. Reload the latest record.', 409);
+  }
 
   const removedFindings = await client.from('audit_findings').delete().eq('submission_id', row.id);
   ensureNoError(removedFindings.error);
@@ -140,7 +155,7 @@ async function loadDatabaseSubmissions(client: NonNullable<ReturnType<typeof get
 
 export async function getKnowledge() {
   const client = getSupabaseAdmin();
-  if (!client) return { guidelines: seedGuidelines, facts: seedFacts, rules: seedRules, customGuidelines: memoryGuidelines };
+  if (!client) return { guidelines: seedGuidelines, facts: [...seedFacts, ...memoryFacts], rules: seedRules, customGuidelines: memoryGuidelines };
   const [guidelineResult, factResult, ruleResult] = await Promise.all([
     client.from('brand_guidelines').select('section_code,title,category,content').limit(500),
     client.from('approved_facts').select('fact_key,claim_statement,exact_value,source_doc').limit(500),
@@ -154,7 +169,7 @@ export async function getKnowledge() {
   const dbRules = ruleResult.data?.[0] as BrandRules | undefined;
   return {
     guidelines: standardGuidelines.length ? standardGuidelines : seedGuidelines,
-    facts: dbFacts.length ? dbFacts : seedFacts,
+    facts: [...new Map([...seedFacts, ...dbFacts].map(fact => [fact.fact_key, fact])).values()],
     rules: dbRules ?? seedRules,
     customGuidelines,
   };
@@ -194,7 +209,7 @@ export async function getSubmission(id: string): Promise<Submission | undefined>
   return (await getSubmissions()).find((row) => row.id === id);
 }
 
-export async function createSubmission(input: Partial<Submission> & { customRules?: CustomAuditRule[] }): Promise<Submission> {
+export async function createSubmission(input: Partial<Submission> & { customRules?: CustomAuditRule[]; visual?: VisualInput; channel?: string }): Promise<Submission> {
   const id = input.id?.trim() || crypto.randomUUID();
   if (input.body_text !== undefined && !input.body_text.trim() && !input.image_inspection) throw new Error('Submission content cannot be blank.');
   const client = getSupabaseAdmin();
@@ -208,9 +223,11 @@ export async function createSubmission(input: Partial<Submission> & { customRule
     created_at: new Date().toISOString(), findings: audit.findings, comments: [], history: ['Draft created', 'Automated brand audit completed'],
     ...(input.image_meta ? { image_meta: input.image_meta } : {}), ...(input.image_inspection ? { image_inspection: input.image_inspection } : {}),
   };
-  if (client) return writeSubmission(client, row);
-  data().unshift(row);
-  return row;
+  const knowledge = await getKnowledge();
+  const managed = await initializeGovernance(row, await evidencePack({ ...knowledge, customGuidelines: [...ruleMap.values()] }), input.visual ?? normalizeVisual(input.image_meta), input.channel || input.content_type || 'Website CMS');
+  if (client) return writeSubmission(client, managed);
+  data().unshift(managed);
+  return managed;
 }
 
 export async function updateSubmission(id: string, patch: Partial<Submission>): Promise<Submission | null> {
@@ -222,8 +239,14 @@ export async function updateSubmission(id: string, patch: Partial<Submission>): 
     comments: patch.comments ?? current.comments,
     history: [...current.history, `${patch.reviewer_name || current.reviewer_name || current.author_name} updated the review · ${new Date().toISOString()}`],
   };
+  if (updated.governance && patch.findings) {
+    updated.governance = structuredClone(updated.governance);
+    updated.governance.revision++;
+    delete updated.governance.approvedHash; delete updated.governance.approvedAt; delete updated.governance.approvedBy;
+    updated.status = 'audited';
+  }
   const client = getSupabaseAdmin();
-  const saved = client ? await writeSubmission(client, updated) : updated;
+  const saved = client ? await writeSubmission(client, updated, current.governance?.revision ?? 0) : updated;
   const rows = data();
   const index = rows.findIndex((row) => row.id === id);
   if (index < 0) rows.unshift(saved); else rows[index] = saved;
@@ -250,4 +273,31 @@ export function analytics(submissions: Submission[] = [], days = 30): WorkspaceA
     categories: Object.entries(labels).map(([key, name]) => ({ name, count: categoryCounts.get(key) ?? 0 })),
     topRules: [...ruleCounts].map(([citation, count]) => ({ citation, count })).sort((a, b) => b.count - a.count).slice(0, 5),
   };
+}
+
+export async function getEvidencePack() { return evidencePack(await getKnowledge()); }
+export async function addApprovedFact(fact: ApprovedFact) {
+  const client = getSupabaseAdmin();
+  if (client) { const result = await client.from('approved_facts').insert(fact); ensureNoError(result.error); } else memoryFacts.push(fact);
+  return fact;
+}
+const reviewLocks = new Map<string, Promise<void>>();
+export async function reviewSubmission(id: string, command: ReviewCommand): Promise<Submission | null> {
+  const previous = reviewLocks.get(id) ?? Promise.resolve();
+  let release!: () => void; const done = new Promise<void>(resolve => { release = resolve; }); reviewLocks.set(id, done); await previous;
+  try {
+    const current = await getSubmission(id); if (!current) return null;
+    const pack = await getEvidencePack();
+    const base = current.governance ? current : await initializeGovernance(current, pack);
+    const updated = await applyReview(base, command, pack);
+    const client = getSupabaseAdmin(); const saved = client ? await writeSubmission(client, updated, current.governance?.revision ?? 0) : updated;
+    const rows = data(); const index = rows.findIndex(row => row.id === id); if (index < 0) rows.unshift(saved); else rows[index] = saved; return saved;
+  } finally { release(); if (reviewLocks.get(id) === done) reviewLocks.delete(id); }
+}
+
+export async function getGovernedSubmission(id: string): Promise<Submission | undefined> {
+  const record = await getSubmission(id); if (!record || record.governance) return record;
+  const managed = await initializeGovernance(record, await getEvidencePack());
+  const client = getSupabaseAdmin(); const saved = client ? await writeSubmission(client, managed) : managed;
+  const rows = data(); const index = rows.findIndex(row => row.id === id); if (index < 0) rows.unshift(saved); else rows[index] = saved; return saved;
 }

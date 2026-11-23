@@ -1,5 +1,6 @@
 import { getSubmission, getSubmissions, createSubmission, updateSubmission } from '@/lib/repository';
 import { normalizeCustomRules } from '@/lib/custom-guidelines';
+import { normalizeVisual } from '@/lib/governance';
 import type { AuditFinding, Submission } from '@/types/governance';
 
 const hexColor = (value: unknown): value is string => typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value);
@@ -30,19 +31,21 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  let input: Partial<Submission> & { customRules?: unknown; visualFindings?: unknown; imageInspection?: unknown };
-  try { input = await request.json() as Partial<Submission> & { customRules?: unknown; visualFindings?: unknown; imageInspection?: unknown }; }
+  let input: Partial<Submission> & { customRules?: unknown; visualFindings?: unknown; imageInspection?: unknown; visual?: unknown; channel?: unknown };
+  try { input = await request.json() as Partial<Submission> & { customRules?: unknown; visualFindings?: unknown; imageInspection?: unknown; visual?: unknown; channel?: unknown }; }
   catch { return Response.json({ error: 'Send a valid JSON submission.' }, { status: 400 }); }
   if (!input || typeof input !== 'object' || Array.isArray(input)) return Response.json({ error: 'Send a submission object.' }, { status: 400 });
   const body = typeof input.body_text === 'string' ? input.body_text.trim() : '';
   if (body.length > 100_000) return Response.json({ error: 'Drafts must be 100,000 characters or fewer.' }, { status: 413 });
+  let visual;
+  try { visual = normalizeVisual(input.visual); } catch (error) { return Response.json({ error: error instanceof Error ? error.message : 'Invalid visual inputs.' }, { status: 400 }); }
   const imageInspection = safeInspection(input.imageInspection);
   const visualFindings = Array.isArray(input.visualFindings) ? input.visualFindings.flatMap((finding) => { const safe = safeFinding(finding); return safe ? [safe] : []; }).slice(0, 30) : [];
   if (!body && !imageInspection) return Response.json({ error: 'Add non-blank campaign text or a valid image inspection.' }, { status: 400 });
   const id = typeof input.id === 'string' && input.id.trim() ? input.id.trim().slice(0, 128) : crypto.randomUUID();
   try {
     if (await getSubmission(id)) return Response.json({ error: 'That submission ID is already in use. Start a new audit.' }, { status: 409 });
-    const submission = await createSubmission({ id, title: typeof input.title === 'string' && input.title.trim() ? input.title.trim().slice(0, 160) : 'Untitled campaign audit', content_type: typeof input.content_type === 'string' ? input.content_type.trim().slice(0, 80) : 'Copy', body_text: body, author_name: typeof input.author_name === 'string' && input.author_name.trim() ? input.author_name.trim().slice(0, 80) : 'Demo creator', customRules: normalizeCustomRules(input.customRules), ...(imageInspection ? { image_inspection: imageInspection } : {}) });
+    const submission = await createSubmission({ id, title: typeof input.title === 'string' && input.title.trim() ? input.title.trim().slice(0, 160) : 'Untitled campaign audit', content_type: typeof input.content_type === 'string' ? input.content_type.trim().slice(0, 80) : 'Copy', body_text: body, author_name: typeof input.author_name === 'string' && input.author_name.trim() ? input.author_name.trim().slice(0, 80) : 'Demo creator', customRules: normalizeCustomRules(input.customRules), visual, channel: typeof input.channel === 'string' ? input.channel.trim().slice(0, 80) : 'Website', ...(imageInspection ? { image_inspection: imageInspection } : {}) });
     if (!visualFindings.length) return Response.json(submission, { status: 201 });
     const updated = await updateSubmission(submission.id, {
       findings: [...submission.findings, ...visualFindings.map((finding) => ({ ...finding, submission_id: submission.id }))],

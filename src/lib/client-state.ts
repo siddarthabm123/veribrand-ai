@@ -33,7 +33,7 @@ function normalizeSubmission(value: unknown): Submission | null {
     if (typeof finding.id !== 'string' || typeof finding.rule_citation !== 'string' || typeof finding.exact_span !== 'string' || typeof finding.suggested_fix !== 'string') return [];
     const categories = new Set(['tone', 'terminology', 'fact_claim', 'visual', 'accessibility']);
     const severities = new Set(['high', 'medium', 'low']);
-    const reviewStatuses = new Set(['pending', 'accepted', 'overridden']);
+    const reviewStatuses = new Set(['pending', 'accepted', 'overridden', 'rejected']);
     return [{
       id: finding.id.slice(0, 128), submission_id: submissionId,
       category: (categories.has(String(finding.category)) ? finding.category : 'tone') as AuditFinding['category'],
@@ -56,6 +56,7 @@ function normalizeSubmission(value: unknown): Submission | null {
     ...(typeof item.reviewer_name === 'string' ? { reviewer_name: item.reviewer_name.slice(0, 80) } : {}), created_at: created,
     findings, comments: Array.isArray(item.comments) ? item.comments.filter((entry): entry is string => typeof entry === 'string').slice(0, 100).map((entry) => entry.slice(0, 1000)) : [],
     history: Array.isArray(item.history) ? item.history.filter((entry): entry is string => typeof entry === 'string').slice(0, 200).map((entry) => entry.slice(0, 500)) : [],
+    ...(item.governance && typeof item.governance === 'object' && (item.governance as { schema?: number }).schema === 1 ? { governance: item.governance as Submission['governance'] } : {}),
     ...(item.image_meta && typeof item.image_meta === 'object' ? { image_meta: item.image_meta as Submission['image_meta'] } : {}),
     ...(item.image_inspection && typeof item.image_inspection === 'object' ? { image_inspection: item.image_inspection as Submission['image_inspection'] } : {}),
   };

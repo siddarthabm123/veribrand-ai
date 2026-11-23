@@ -72,6 +72,7 @@ export default function WelcomeLanding({ onEnter }: { onEnter?: (session: Active
     { label: 'Brand Knowledge & Rules', href: '/knowledge' },
     { label: '30-Sec Brand Passport', href: '/impact' },
     { label: 'Gap Radar Analytics', href: '/analytics' },
+    { label: 'Claim Evidence Library', href: '/evidence' },
   ];
 
   return <main className="vb-site">
