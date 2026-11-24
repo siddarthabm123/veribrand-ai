@@ -10,6 +10,7 @@ export async function proxy(request: NextRequest) {
   const demo = process.env.VERIBRAND_AUTH_MODE === 'demo' || (!url && process.env.VERIBRAND_AUTH_MODE !== 'required');
   headers.set('x-veribrand-mode', demo ? 'demo' : 'authenticated');
   const next = () => { const response = NextResponse.next({ request: { headers } }); response.headers.set('Cache-Control', 'no-store'); return response; };
+  if (request.nextUrl.pathname === '/api/auth/signup' && request.method === 'POST') return next();
   if (demo) return next();
   const context = request.nextUrl.pathname === '/api/access';
   let signedIn = false;

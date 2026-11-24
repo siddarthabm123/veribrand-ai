@@ -41,6 +41,10 @@ export async function POST(request: Request) {
       password,
       email_confirm: true,
       user_metadata: { full_name: fullName, brand_name: brandName },
+      app_metadata: {
+        veribrand_workspace: process.env.VERIBRAND_WORKSPACE_ID || 'veribrand',
+        veribrand_role: 'Content Creator',
+      },
     });
 
     if (error) {

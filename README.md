@@ -20,7 +20,7 @@ This deployment serves **one workspace**, selected by `VERIBRAND_WORKSPACE_ID` (
 {"veribrand_workspace":"veribrand","veribrand_role":"Brand Reviewer"}
 ```
 
-Allowed roles: `Content Creator`, `Brand Reviewer`, `Brand Admin`. Creators can submit/edit but cannot approve, reject, override, register publication, or submit monitoring observations. Reviewers can decide and check the gate. Only admins can create/update evidence and phrase rules. New signups have no workspace membership until provisioned; the UI explains this rather than granting reviewer access automatically. No tenant or role administration UI is included.
+Allowed roles: `Content Creator`, `Brand Reviewer`, `Brand Admin`. Creators can submit/edit but cannot approve, reject, override, register publication, or submit monitoring observations. Reviewers can decide and check the gate. Only admins can create/update evidence and phrase rules. Self-service signups receive the least-privileged `Content Creator` role in the configured workspace. No tenant or role administration UI is included.
 
 Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or legacy anon key), and server-only `SUPABASE_SECRET_KEY` / `SUPABASE_SERVICE_ROLE_KEY`. Authenticated production mode also requires persistent storage and blocks requests if the server database key is missing. Existing Supabase tables are reused; no new migration is required. This is a server-enforced single-workspace boundary, not a multi-tenant RLS design.
 
