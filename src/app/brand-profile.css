@@ -1,0 +1,12 @@
+/* Account brand identity, independent of authorization metadata. */
+.brand-profile-switch { display: flex; align-items: center; gap: 12px; padding: 16px 10px; margin: 0 0 20px; border: 1px solid var(--vb-rule); border-radius: 4px; text-decoration: none; color: inherit; min-width: 0; }
+.brand-profile-switch:focus-visible { outline: 3px solid var(--vb-focus); outline-offset: 3px; }
+.brand-profile-initials { display: grid; place-items: center; width: 40px; height: 40px; flex-shrink: 0; border-radius: 4px; background: var(--vb-object-face); color: var(--vb-white); font-size: 18px; font-weight: 500; }
+.brand-profile-copy { min-width: 0; flex: 1; }
+.brand-profile-copy b { display: block; overflow-wrap: anywhere; font-size: 14px; }
+.brand-profile-copy small { display: block; color: var(--vb-muted); font-size: 12px; margin-top: 3px; }
+.dh-sidebar .brand-profile-switch { border-color: var(--vb-dark-rule); }
+.dh-sidebar .brand-profile-copy small { color: var(--vb-light-muted); }
+.brand-profile-preview { display: flex; align-items: center; gap: 14px; padding-bottom: 24px; border-bottom: 1px solid var(--vb-rule); margin-bottom: 24px; }
+.brand-profile-preview small { margin-top: 4px; }
+.gv-page .brand-profile-preview + p { margin-block: 20px; }
