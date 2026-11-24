@@ -10,23 +10,23 @@
 @font-face { font-family: 'Geist'; src: url('/fonts/geist-medium.ttf') format('truetype'); font-style: normal; font-weight: 500 600; font-display: swap; }
 
 :root {
-  --vb-paper: #f0f3f2;
-  --vb-paper-2: #e7ecea;
-  --vb-white: #fafbf9;
-  --vb-ink: #182924;
-  --vb-ink-2: #344b41;
-  --vb-muted: #56665e;
-  --vb-rule: #cbd3cd;
-  --vb-orange: #ef8a43;
-  --vb-orange-hover: #f7a56b;
-  --vb-focus: #98501d;
-  --vb-light-muted: #bdc9c1;
-  --vb-dark-rule: #3f5549;
-  --vb-object-side: #263c31;
-  --vb-object-face: #4e6654;
-  --vb-object-light: #9ba997;
-  --vb-object-edge: #b8c1b1;
-  --vb-shadow: #1a35252b;
+  --vb-paper: #f3f7f4;
+  --vb-paper-2: #e7f1ea;
+  --vb-white: #ffffff;
+  --vb-ink: #20342c;
+  --vb-ink-2: #3b6250;
+  --vb-muted: #5c7065;
+  --vb-rule: #d5e2d9;
+  --vb-orange: #d9531e;
+  --vb-orange-hover: #bf461b;
+  --vb-focus: #267752;
+  --vb-light-muted: #d3e4d9;
+  --vb-dark-rule: #c8dfd0;
+  --vb-object-side: #70a98a;
+  --vb-object-face: #9ac9ac;
+  --vb-object-light: #c7e6d0;
+  --vb-object-edge: #e4f3e8;
+  --vb-shadow: #315c4220;
   --vb-clear: transparent;
   --vb-dot: #354d411b;
   --vb-font-display: 'Hedvig Letters Serif', Georgia, serif;

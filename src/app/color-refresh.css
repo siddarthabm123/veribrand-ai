@@ -1,0 +1,168 @@
+/* Sage and cream palette adapted from the RigDesk reference. */
+:root {
+  --ink: #20342c;
+  --muted: #5c7065;
+  --line: #d5e2d9;
+  --blue: #4e8095;
+  --bg: #f3f7f4;
+  --green: #347d59;
+  --vb-sidebar: #e2f0e7;
+  --vb-sidebar-hover: #d5eadc;
+  --vb-surface-cool: #edf5f7;
+  --vb-blue: #4e8095;
+  --vb-blue-soft: #e5f1f4;
+}
+
+body { background: var(--vb-paper); color: var(--vb-ink); }
+:focus-visible { outline-color: var(--vb-focus); }
+::selection { background: #cce8d5; color: var(--vb-ink); }
+
+/* Workspace shell */
+.app-shell { background: var(--vb-paper); color: var(--vb-ink); }
+.app-shell .sidebar {
+  background: var(--vb-sidebar);
+  color: var(--vb-ink);
+  border-right: 1px solid var(--vb-rule);
+}
+.app-shell .brand-mark { color: var(--vb-ink-2); }
+.app-shell .brand b span { color: #39805c; }
+.app-shell .brand small,
+.app-shell .workspace-switch small,
+.app-shell .profile small,
+.app-shell .side-label { color: #5c7567; }
+.app-shell .workspace-switch { border-color: #c6ddce; background: #f8fcf9; }
+.app-shell .acme-mark,
+.app-shell .sidebar .avatar { background: #cee7d6; color: #285a40; }
+.app-shell .sidebar nav a { color: #496758; }
+.app-shell .sidebar nav a.active,
+.app-shell .sidebar nav a:hover { background: var(--vb-sidebar-hover); color: #214d37; }
+.app-shell .sidebar nav a.active svg { color: #28764e; }
+.app-shell .sidebar :focus-visible { outline-color: var(--vb-focus); }
+.app-shell .sidebar-note { background: #f8fcf9; border-color: #c6ddce; }
+.app-shell .sidebar-note p,
+.app-shell .sidebar-note span { color: #536e60; }
+.app-shell .sidebar-note .note-icon { color: #cf633c; }
+.app-shell .profile-session-wrap { border-color: #c6ddce; }
+.app-shell .profile-session { color: var(--vb-ink); }
+.app-shell .topbar { background: #fbfdfb; }
+.app-shell .content { background: transparent; }
+.app-shell .judge-banner { background: linear-gradient(110deg, #e7f4ea, #edf5f7); border: 1px solid #d9e9df; }
+.app-shell .judge-icon { background: #d2ead9; color: #28764e; }
+.app-shell .text-link,
+.app-shell .radar-link { color: #28764e; }
+.app-shell .primary-btn {
+  color: #fff;
+  background: #347d59;
+  border-color: #347d59;
+  border-radius: 9px;
+  box-shadow: 0 5px 14px #347d5925;
+}
+.app-shell .primary-btn:hover { background: #286b4b; }
+.app-shell .secondary-btn { border-radius: 9px; background: #fff; }
+.app-shell .secondary-btn:hover { background: #edf5ef; border-color: #b9d5c2; }
+.app-shell .panel { border-radius: 12px; box-shadow: 0 8px 24px #315c4209; }
+.app-shell .stat-card { border-radius: 12px; border-top-color: #b9d8c4; }
+.app-shell .stat-icon.green { color: #26724d; background: #dff1e5; }
+.app-shell .stat-icon.blue { color: #427991; background: var(--vb-blue-soft); }
+.app-shell .stat-icon.amber { color: #93642b; background: #fff1dc; }
+.app-shell .stat-icon.red { color: #a74c43; background: #fbe9e5; }
+.app-shell .table-head { background: #edf4ef; }
+.app-shell .submission-row:hover { background: #f0f7f2; }
+.app-shell .content-icon { background: #e3f0e7; color: #347d59; }
+.passport-launcher { background: #347d59; color: #fff; border-color: #347d59; border-radius: 999px; box-shadow: 0 8px 22px #315c4225; }
+.passport-launcher > span { color: #fff; }
+.passport-launcher:hover { background: #286b4b; }
+
+/* Welcome, judge and quick-start accents */
+.welcome-page {
+  color: var(--vb-ink);
+  background: radial-gradient(ellipse at 50% -30%, #e5f2e9 0, transparent 48%), var(--vb-paper);
+}
+.welcome-nav,
+.welcome-proof,
+.welcome-footer,
+.how-strip { border-color: var(--vb-rule); }
+.welcome-logo > span { background: #347d59; border-radius: 10px; }
+.welcome-logo b span { color: #478567; }
+.welcome-badge { background: #e5f2e9; border-color: #d1e6d8; color: #286b4b; }
+.welcome-hero h1 em,
+.strip-heading > span,
+.persona-intro > div:first-child > span { color: #347d59; }
+.welcome-primary,
+.welcome-skip-button { background: #347d59; border-color: #347d59; color: #fff; box-shadow: 0 5px 14px #347d5925; }
+.welcome-primary:hover,
+.welcome-skip-button:hover { background: #286b4b; }
+.welcome-secondary { color: #347d59; border-color: #d5e2d9; background: #fff; }
+.welcome-secondary:hover { background: #edf5ef; }
+.how-grid article,
+.persona-card { border-color: var(--vb-rule); border-radius: 12px; box-shadow: 0 5px 18px #315c4208; }
+.how-top { color: #347d59; }
+.persona-demo-tag { background: #e1f2e6; color: #286b4b; }
+.persona-avatar.indigo { color: #4e8095; background: #e5f1f4; }
+.persona-avatar.peach { color: #a65d3e; background: #fbece4; }
+.persona-avatar.green { color: #286b4b; background: #e1f2e6; }
+.custom-persona { background: #e8f1eb; }
+.custom-persona button { background: #347d59; color: #fff; }
+.welcome-proof > div > span { background: #e1f2e6; color: #347d59; }
+.welcome-footer > a { color: #347d59; }
+.welcome-quick-links a:hover { border-color: #a9cfb5; color: #286b4b; }
+.tour-dialog-head > span { color: #347d59; }
+.tour-progress button.current,
+.tour-next { background: #347d59; border-color: #347d59; color: #fff; }
+.tour-progress button.current { box-shadow: 0 0 0 4px #e3f2e8; }
+.tour-progress button.done { background: #e1f2e6; border-color: #cce5d4; color: #286b4b; }
+.tour-target { background: #f1f7f3; border-color: #dbe9df; }
+.tour-target > span { background: #e1f2e6; color: #347d59; }
+.tour-jump { color: #347d59; background: #e7f3ea; border-color: #d2e7d9; }
+
+/* Account forms and the campaign/audit surfaces */
+.auth-story { background: linear-gradient(145deg, #d8eee0, #e8f2ed 72%, #e6f0f3); color: var(--vb-ink); }
+.auth-story .auth-brand span { color: #347d59; }
+.auth-story-copy p,
+.auth-story-foot { color: #536e60; }
+.auth-proof i { background: #a9cbb5; }
+.auth-proof span { border-color: #8dbb9d; }
+.auth-tabs a[aria-current] { border-color: #347d59; color: #286b4b; }
+.auth-page input:focus { border-color: #55a777; box-shadow: 0 0 0 3px #55a77724; outline: none; }
+.auth-submit { background: #347d59; color: #fff; border-color: #347d59; border-radius: 9px; }
+.auth-submit:hover:not(:disabled) { background: #286b4b; }
+.auth-notice,
+.auth-success { background: #e7f4ea; border-color: #347d59; }
+.auth-error { background: #fff0eb; border-color: #c7533d; }
+.auth-success { color: #214d37; }
+
+.passport-page,
+.disclosure-page { background-color: var(--vb-paper); color: var(--vb-ink); }
+.passport-page .passport-brand > span { background: #347d59; }
+.passport-page .passport-kicker { color: #347d59; }
+.passport-page .passport-pills span { background: #e5f2e9; color: #286b4b; border-color: #d0e5d7; }
+.passport-page .passport-export,
+.passport-page .passport-metrics,
+.passport-page .passport-diff,
+.passport-page .passport-workbench,
+.passport-page .passport-bottom { border-color: var(--vb-rule); background-color: #fff; }
+.passport-page .passport-hero button,
+.passport-page .passport-primary,
+.passport-page .apply-recommendation { background: #347d59; color: #fff; border-color: #347d59; }
+.passport-page .passport-hero button:hover,
+.passport-page .passport-primary:hover,
+.passport-page .apply-recommendation:hover { background: #286b4b; }
+.passport-page .passport-input:focus,
+.passport-page input:focus,
+.passport-page textarea:focus { border-color: #55a777; box-shadow: 0 0 0 3px #55a77724; outline: none; }
+.passport-page .passport-card,
+.passport-page .workbench-card,
+.passport-page .evidence-item,
+.passport-page .room-card { border-color: var(--vb-rule); border-radius: 12px; box-shadow: 0 8px 24px #315c4209; }
+.passport-page .passport-record-id,
+.passport-page .evidence-source { color: var(--vb-muted); }
+.passport-page .risk-tag { background: #fff1dc; color: #875d28; }
+.disclosure-page .disclosure-kicker { color: #347d59; }
+.disclosure-page .disclosure-passport { background: #347d59; color: #fff; border-color: #347d59; }
+.passport-page :is(button,a):focus-visible,
+.disclosure-page :is(button,a):focus-visible { outline-color: var(--vb-focus); }
+
+@media (max-width: 760px) {
+  .app-shell .sidebar { background: var(--vb-sidebar); }
+  .welcome-page { padding-inline: 18px; }
+}
