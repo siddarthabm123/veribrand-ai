@@ -1,0 +1,21 @@
+/* Judge sandbox: clearly labelled, separate from workspace accounts. */
+.judge-banner { padding: 18px 0; border-bottom: 1px solid var(--vb-rule); display: flex; gap: 12px 24px; flex-wrap: wrap; font-size: 14px; }
+.judge-banner span { color: var(--vb-muted); }
+.judge-page .gv-intro { padding-block: 32px 24px; }
+.judge-page .gv-intro h1 { font-size: clamp(30px, 4vw, 44px); }
+.judge-walkthrough { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 0; list-style: none; gap: 20px; }
+.judge-walkthrough li { display: grid; gap: 8px; border-top: 2px solid var(--vb-object-face); padding-top: 12px; font-size: 14px; }
+.judge-walkthrough span { font-size: 12px; color: var(--vb-muted); }
+.judge-layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 28px; align-items: start; }
+.judge-samples { position: sticky; top: 20px; }
+.judge-samples h2 { font-size: 18px; }
+.judge-samples > button { display: grid; gap: 8px; width: 100%; border: 1px solid var(--vb-rule); border-radius: 4px; margin-bottom: 12px; padding: 16px; text-align: left; color: var(--vb-ink); background: var(--vb-white); font: inherit; cursor: pointer; }
+.judge-samples > button.selected { border-color: var(--vb-ink); background: var(--vb-paper-2); }
+.judge-samples > button span { font-size: 12px; color: var(--vb-muted); }
+.judge-samples > button b { font-size: 14px; font-weight: 500; }
+.judge-samples > p { font-size: 12px; color: var(--vb-muted); }
+.judge-review { min-width: 0; }
+.judge-page .gv-nav > a { display: flex; gap: 10px; align-items: center; }
+.judge-page .gv-readiness { margin-top: 0; }
+.judge-page .gv-panel .gv-panel { border: 0; padding: 0; }
+@media (max-width: 760px) { .judge-layout { grid-template-columns: minmax(0, 1fr); } .judge-samples { position: static; } .judge-walkthrough { grid-template-columns: repeat(2, minmax(0, 1fr)); } .judge-samples > button { padding: 12px; } }
