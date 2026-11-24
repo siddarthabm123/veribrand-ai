@@ -65,13 +65,22 @@ export default function AuthScreen({ mode }: { mode: Mode }) {
         setRecoveryReady(false);
         setMessage('Your password has been updated. Sign in with your new password.');
       } else if (mode === 'signup') {
-        const result = await client.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth/callback`, data: { full_name: String(values.get('name') || '').trim(), brand_name: brandName(values.get('brand')) } } });
-        if (result.error) throw result.error;
-        if (!result.data.session || !result.data.user) {
-          throw new Error('Direct signup is not enabled for this project yet. The project owner must turn off Confirm email in Supabase Authentication → Sign In / Providers → Email.');
+        const fullName = String(values.get('name') || '').trim();
+        const workspace = brandName(values.get('brand'));
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, fullName, brandName: workspace }),
+        });
+        const result = await response.json() as { error?: string };
+        if (!response.ok) throw new Error(result.error || 'We could not create your account. Please try again.');
+
+        const signIn = await client.auth.signInWithPassword({ email, password });
+        if (signIn.error || !signIn.data.user) {
+          throw new Error('Your account was created. Sign in with your email and password to continue.');
         }
-        saveSession({ name: String(result.data.user.user_metadata?.full_name || email.split('@')[0]), email: result.data.user.email, workspace: brandName(result.data.user.user_metadata?.brand_name) || 'Your brand', role: 'Content Creator', entered: true });
-        router.replace('/');
+        saveSession({ name: String(signIn.data.user.user_metadata?.full_name || fullName || email.split('@')[0]), email: signIn.data.user.email, workspace: brandName(signIn.data.user.user_metadata?.brand_name) || workspace || 'Your brand', role: 'Content Creator', entered: true });
+        router.replace('/auth/callback');
       } else {
         const result = await client.auth.signInWithPassword({ email, password });
         if (result.error) throw new Error('Unable to sign in. Check your email and password, or reset your password.');
